@@ -1,0 +1,500 @@
+   43  l
+   44  mv * ../../javascript/
+   45  l
+   46  cd ..
+   47  l
+   48  rmdir js
+   49  ln -s js ../javascript/
+   50  l
+   51  cd ..
+   52  l
+   53  cd javascript/
+   54  l
+   55  rm js
+   56  cd ../public/
+   57  ln -s ../javascript/ js
+   58  l
+   59  rm apple-touch-icon*
+   60  rm Session.vim 
+   61  mkdir ../docs
+   62  mv bugs.txt  ../docs/
+   63  vi humans.txt 
+   64  rm humans.txt 
+   65  l
+   66  cd build/
+   67  l
+   68  l
+   69  l
+   70  cd ..
+   71  rm -rf build
+   72  l
+   73  vi index.html 
+   74  cd img
+   75  l
+   76  cd ..
+   77  l
+   78  cd ..
+   79  l
+   80  mkdir scripts
+   81  cd public/
+   82  l
+   83  l
+   84  cd ..
+   85  l
+   86  mkdir scripts
+   87  l
+   88  cd public/
+   89  l
+   90  cd ..
+   91  l
+   92  cd scripts/
+   93  l
+   94  cd ..
+   95  cd ..
+   96  l
+   97  ls -R | grep login
+   98  l
+   99  ls -vR | grep login
+  100  ls -lR | grep login
+  101  ls -dlR | grep login
+  102  ls -ld
+  103  l
+  104  man ls
+  105  ls -R
+  106  ls -R > this
+  107  vi this
+  108  rm this
+  109  l
+  110  cd dbag/
+  111  l
+  112  cd php/
+  113  l
+  114  mv * ../scripts/
+  115  cd ..
+  116  rmdir php
+  117  l
+  118  vi README.txt 
+  119  mkdir sql
+  120  mv system_tables.sql sql/
+  121  l
+  122  rm -rf .git*
+  123  l
+  124  l -a
+  125  vi .flashProjectProperties 
+  126  rm .flashProjectProperties 
+  127  vi .htaccess 
+  128  mv .htaccess public/
+  129  defaults write com.apple.finder AppleShowAllFiles TRUE
+  130  killall Finder
+  131  exit
+  132  l
+  133  cd-db
+  134  l
+  135  cd ..
+  136  cd ..
+  137  l
+  138  vi README.txt 
+  139  mv README.txt docs
+  140  ln -s docs/README.txt ./
+  141  l
+  142  vi README.txt 
+  143  l
+  144  l
+  145  cd docs/
+  146  l
+  147  cd ..
+  148  mv public/js ./
+  149  l
+  150  mv javascript/ public/js
+  151  cd js
+  152  l
+  153  rm js
+  154  ln -s public/js/ javascript
+  155  l
+  156  cd scripts/
+  157  l
+  158  l
+  159  cd ..
+  160  cd public/
+  161  l
+  162  vi index.html 
+  163  cd js/
+  164  l
+  165  mv rename.pl ../../scripts/
+  166  cd mylibs/
+  167  l
+  168  cd ..
+  169  mkdir mv json.js libs
+  170  l
+  171  cd libs/
+  172  l
+  173  mv ../json.js ./
+  174  cd ..
+  175  l
+  176  vi ../index.html 
+  177  l
+  178  rm mv
+  179  l mv
+  180  rmdir mv
+  181  l
+  182  vi script.js 
+  183  rm script.js 
+  184  vi plugins.js 
+  185  mv plugins.js libs/
+  186  vi ../index.html 
+  187  l
+  188  l libs
+  189  cd ../../
+  190  l
+  191  cd public/
+  192  l
+  193  grep -R modern *
+  194  v index.html 
+  195  vi index.html 
+  196  cd ..
+  197  cd ..
+  198  cp -R dbag dbag.bak
+  199  l
+  200  cd dbag.bak/
+  201  l
+  202  diff README.txt ../dbag/README.txt 
+  203  cd ..
+  204  cd dbagt
+  205  cd dbag
+  206  l
+  207  cd public/
+  208  l
+  209  cd js/
+  210  l
+  211  mkdir view
+  212  mkdir cont
+  213  mkdir modl
+  214  l
+  215  mv modl model
+  216  mv cont controllers
+  217  mv view views
+  218  l
+  219  mv model models
+  220  l
+  221  l
+  222  cd mylibs/
+  223  l
+  224  mv busted/ ../
+  225  cd ..
+  226  rmdir mylibs/
+  227  cd mylibs/
+  228  l
+  229  l .*
+  230  l -a
+  231  vi .gitignore 
+  232  rm .gitignore 
+  233  cd ..
+  234  cd ..
+  235  ls -R
+  236  ls -aR
+  237  ls -aR .*
+  238  rm img/.gitignore 
+  239  ls -aR .* | grep git
+  240  l
+  241  cd img
+  242  cd ..
+  243  cd ..
+  244  l
+  245  vi .gitignore
+  246  l
+  247  vi .gitignore
+  248  cd public/
+  249  vi .htaccess
+  250  l
+  251  vi index.html 
+  252  sudo vi /etc/hosts
+  253  cd-http
+  254  l
+  255  vi httpd.conf 
+  256  vi httpd.conf 
+  257  cd-dbag
+  258  cd-db
+  259  l
+  260  cd ..
+  261  l
+  262  vi index.php
+  263  l
+  264  cd ..
+  265  l
+  266  mv scripts/ library
+  267  l
+  268  cd l
+  269  l
+  270  vi README.txt 
+  271  cd library/
+  272  l
+  273  vi login.php 
+  274  mv ZendFramework-1.11.0/ Zend
+  275  cd Zend/
+  276  l
+  277  vi INSTALL.txt 
+  278  vi ../../public/index.php 
+  279  cd ..
+  280  cd ..
+  281  l
+  282  cd library/
+  283  l
+  284  cd ..
+  285  mkdir scripts
+  286  mv library/rename.pl scripts
+  287  l
+  288  l scripts
+  289  cd library/
+  290  l
+  291  mkdir application
+  292  mv *.php application
+  293  vi ../public/index.php 
+  294  l
+  295  mv application/ ../
+  296  cd ..
+  297  l
+  298  vi public/index.php 
+  299  mkdir config
+  300  cd config/
+  301  l
+  302  vi application.ini
+  303  cd ..
+  304  l
+  305  cd application/
+  306  l
+  307  cd ..
+  308  mv application/ models
+  309  mkdir controllers
+  310  l
+  311  vi config/application.ini 
+  312  mkdir application
+  313  vi README.txt 
+  314  l
+  315  cd config/
+  316  l
+  317  cd ..
+  318  vi README.txt 
+  319  l
+  320  cd public/
+  321  l
+  322  vi index.php 
+  323  l
+  324  cd ..
+  325  l
+  326  mv library/ vendor
+  327  vi README.txt 
+  328  l
+  329  cd application/
+  330  l
+  331  mv ../controllers/ ./
+  332  l
+  333  mkdidr modules
+  334  mkdir modules
+  335  cd ..
+  336  l
+  337  vi README.txt 
+  338  ls -aR | grep view
+  339  l
+  340  cd application/
+  341  l
+  342  mkdir views
+  343  cd ..
+  344  l
+  345  cd vendor/
+  346  l
+  347  cd ..
+  348  cd models/
+  349  l
+  350  mv * ../application/modules/
+  351  cd ..
+  352  rmdir models
+  353  l
+  354  cd application/
+  355  l
+  356  cd controllers/
+  357  l
+  358  cd ..
+  359  ls -aR
+  360  l
+  361  cd ..
+  362  l
+  363  vi README.txt 
+  364  mkdir data
+  365  mkdi8r tests
+  366  mkdir tests
+  367  l
+  368  cd application/
+  369  l
+  370  cd views/
+  371  l
+  372  mkdir scripts
+  373  mkdir partials
+  374  mkdir scripts
+  375  l
+  376  mkdir layouts
+  377  cd layouts/
+  378  cp ../../../public/index.html index.phtml
+  379  vi index.phtml 
+  380  cd ..
+  381  l
+  382  cd ..
+  383  l
+  384  l
+  385  l
+  386  cd ..
+  387  l
+  388  vi README.txt 
+  389  cd public/
+  390  l
+  391  rm index.html 
+  392  vi index.php 
+  393  cd-http
+  394  l
+  395  vi httpd.conf 
+  396  l
+  397  cd-db
+  398  l
+  399  vi ../index.php 
+  400  cd ../../
+  401  vi application/controllers/IndexController.php
+  402  l
+  403  vi README.txt 
+  404  mkdir library
+  405  ls -aR > this
+  406  vi this
+  407  rm this
+  408  vi public/index.php 
+  409  l
+  410  ln -s application/controllers/IndexController.php IndexController.php
+  411  l
+  412  vi IndexController.php 
+  413  ln -s application/views/layouts/index.phtml index.phtml
+  414  l
+  415  vi index.phtml 
+  416  vi IndexController.php 
+  417  cd library/
+  418  l
+  419  cd ../vendor/
+  420  l
+  421  cd ..
+  422  locate Bootstrap.php
+  423  ls -aR > th is
+  424  ls -aR > this
+  425  l
+  426  rm th
+  427  vi this
+  428  rm this
+  429  cd application/
+  430  ls -aR > this
+  431  vi this
+  432  rm this
+  433  cd ..
+  434  l
+  435  l library
+  436  grep -R development
+  437  grep -R development *
+  438  man grep
+  439  grep -R --exclude-dir vendor/Zend development *
+  440  vi public/index.php 
+  441  cd library/
+  442  vi Bootstrap.php
+  443  vi ../public/index.php 
+  444  l
+  445  l
+  446  cd ..
+  447  l
+  448  cd public/
+  449  l
+  450  mv index.php bak.index.php
+  451  vi index.php
+  452  mv index.php test.index.php
+  453  mv bak.index.php index.php
+  454  vi index.php 
+  455  vi ~/mamp/logs/php_error.log 
+  456  vi ~/mamp/logs/php_error.log 
+  457  l
+  458  cd ..
+  459  l
+  460  cd vendor/
+  461  l
+  462  cd Zend/
+  463  l
+  464  cd library/
+  465  l
+  466  cd Zend/
+  467  l
+  468  vi Application.php 
+  469  cd ~
+  470  cd dev/dbag
+  471  l
+  472  vi public/index.php 
+  473  cd vendor/
+  474  l
+  475  cd ../library/
+  476  l
+  477  mv Bootstrap.php ../application/
+  478  l
+  479  cd ..
+  480  vi README.txt 
+  481  vi application/Bootstrap.php 
+  482  l
+  483  cd application/views/scripts/
+  484  mkdir index
+  485  l
+  486  l
+  487  l ../
+  488  pwd
+  489  l
+  490  cp ../layouts/index.phtml index/index.phtml
+  491  cd ..
+  492  cd ..
+  493  l
+  494  cd ..
+  495  l
+  496  rm index.phtml 
+  497  ln -s application/views/scripts/index/index.phtml ./
+  498  l
+  499  vi index.phtml 
+  500  l
+  501  cd dev/dbag
+  502  l
+  503  vi application/Bootstrap.php 
+  504  l
+  505  cd library/
+  506  l
+  507  mv ../application/Bootstrap.php ZFDbag_Bootstrap.php
+  508  vi ../public/index.php 
+  509  l
+  510  mkdir ZFExt
+  511  mv ZFDbag_Bootstrap.php ZFExt/Bootstrap.php
+  512  l
+  513  cd ZFExt/
+  514  l
+  515  cd ..
+  516  cd ..
+  517  l
+  518  cd vendor/
+  519  l
+  520  cd Zend/
+  521  cd ../../library/ZFExt/
+  522  l
+  523  vi Bootstrap.php 
+  524  l
+  525  l
+  526  cd ../
+  527  cd ../
+  528  l
+  529  vi index.phtml 
+  530  vi IndexController.php 
+  531  vi .gitignore 
+  532  l
+  533  curl -i -u bonestorm -d '{"name" : "dbag", "auto_init": true}' https://api.girhub.com/bonestorm/repos
+  534  curl -i -u bonestorm -d '{"name" : "dbag", "auto_init": true}' https://api.girhub.com/user/repos
+  535  curl -i -u bonestorm -d '{"name" : "dbag", "auto_init": true}' https://api.github.com/user/repos
+  536  l
+  537  vi make_repo.sh 
+  538  git init
+  539  git add .
+  540  git commit -m "Initial Commit"
+  541  locate .gitignore
+  542  history > this
