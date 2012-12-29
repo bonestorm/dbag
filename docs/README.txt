@@ -16,9 +16,29 @@ to install:
 
 2. Run "<INSTALL_DIRECTORY>/sql/system_tables.sql" into MySQL.  This creates the application database 'dbag' and fills it with tables it needs to store application data.
 
-3. Make a virtual host with document root at "<INSTALL_DIRECTORY>/public/"
+3. Make a virtual host for Apache with document root at "<INSTALL_DIRECTORY>/public/".  Many tutorials are available on the net for doing this but the basic steps:
+	I. add this to you httpd.conf:
+"
+Listen 80
+NameVirtualHost *:80
+<VirtualHost *:80>
+	DocumentRoot <INSTALL_DIRECTORY>/public
+	ServerName dbag
+</VirtualHost>
+"
+		The basic idea is that the server must be listening on port 80 (unless you want to add the port you're using like "dbag:8008"), and add NameVirtualHost to tell Apache to use virtual hosts, and add your virtual host 'dbag'.  Note: this will disable your existing host so should add it again as another virtual host in httpd.conf like:
+"
+<VirtualHost *80>
+	ServerName <EXISTING_HOST>
+	DocumentRoot <OLD_DOCUMENT_ROOT>
+</VirtualHost>
+"
+		See "http://httpd.apache.org/docs/2.2/vhosts/name-based.html#using", at "Main host goes away" section.
+	II. add a new line to /etc/hosts file "127.0.0.1   dbag"
+	III. restart Apache
+	IIII. go to "http://dbag" in your browser
 
-4. Go to your virtual domain in a browser.  The application should be manifest.
+	There are other (better) ways of doing this but this is a start.
 
 ==
 to learn application operation:
