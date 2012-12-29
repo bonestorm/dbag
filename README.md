@@ -1,8 +1,8 @@
 DBag
 ===
 
-# author: David Jensen
-# version: 1.whatever (ultra Alpha build)
+*author: David Jensen*
+*version: 1.whatever (ultra Alpha build)*
 
 prereqs:
 ===
@@ -51,7 +51,8 @@ to learn application operation:
 directory structure:
 ==
 
-* './' is used as <INSTALL_DIRECTORY>
+('./' is used as <INSTALL_DIRECTORY>)
+
 * ./public - document root, public html directory, exposes this application through Apache, contains all html/css/image/javascript assets, !!extra static content should be placed here!!
 * ./javascript - link to ./public/js, javascript files, this is where the majority of the application resides, client javascript using HTML5 Canvas and jQuery
 * ./application - application specific code, Views/Controllers, bootstrap code
