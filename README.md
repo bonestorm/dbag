@@ -1,8 +1,9 @@
 DBag
 ===
 
-*author: David Jensen*
-*version: 1.whatever (ultra Alpha build)*
+**author: David Jensen**
+
+**version: 1.whatever (ultra Alpha build)**
 
 prereqs:
 ===
