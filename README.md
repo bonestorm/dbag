@@ -19,29 +19,29 @@ to install:
 
  Make a virtual host for Apache with document root at "&lt;INSTALL_DIRECTORY&gt;/public/".  Many tutorials are available on the net for doing this but the basic steps:
 
-	- add this to you httpd.conf:
+    - add this to you httpd.conf:
 
-			Listen 80
-			NameVirtualHost *:80
-			<VirtualHost *:80>
-				DocumentRoot &lt;INSTALL_DIRECTORY&gt;/public
-				ServerName dbag
-			</VirtualHost>
+            Listen 80
+            NameVirtualHost *:80
+            <VirtualHost *:80>
+                DocumentRoot &lt;INSTALL_DIRECTORY&gt;/public
+                ServerName dbag
+            </VirtualHost>
 
-		The basic idea is that the server must be listening on port 80 (unless you want to add the port you're using like "dbag:8008"), and add NameVirtualHost to tell Apache to use virtual hosts, and add your virtual host 'dbag'.  Note: this will disable your existing host so should add it again as another virtual host in httpd.conf like:
+        The basic idea is that the server must be listening on port 80 (unless you want to add the port you're using like "dbag:8008"), and add NameVirtualHost to tell Apache to use virtual hosts, and add your virtual host 'dbag'.  Note: this will disable your existing host so should add it again as another virtual host in httpd.conf like:
 
-			<VirtualHost *80>
-				ServerName <EXISTING_HOST>
-				DocumentRoot <OLD_DOCUMENT_ROOT>
-			</VirtualHost>
+            <VirtualHost *80>
+                ServerName <EXISTING_HOST>
+                DocumentRoot <OLD_DOCUMENT_ROOT>
+            </VirtualHost>
 
-		See [Apache Virtual Hosts](http://httpd.apache.org/docs/2.2/vhosts/name-based.html#using), at "Main host goes away" section.
+        See [Apache Virtual Hosts](http://httpd.apache.org/docs/2.2/vhosts/name-based.html#using), at "Main host goes away" section.
 
-	- add a new line to /etc/hosts file "127.0.0.1   dbag"
-	- restart Apache
-	- go to "http://dbag" in your browser
+    - add a new line to /etc/hosts file "127.0.0.1   dbag"
+    - restart Apache
+    - go to "http://dbag" in your browser
 
-		There are other (better) ways of doing this but this is a start.
+    There are other (better) ways of doing this but this is a start.
 
 to learn application operation:
 ==
