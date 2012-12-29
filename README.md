@@ -13,18 +13,18 @@ You need MySQL, Apache, PHP all installed
 to install:
 ===
 
-1. You need to put MySQL login information in "<INSTALL_DIRECTORY>/modules/login.php.
+1. You need to put MySQL login information in "&lt;INSTALL_DIRECTORY&gt;/modules/login.php.
 
-2. Run "<INSTALL_DIRECTORY>/sql/system_tables.sql" into MySQL.  This creates the application database 'dbag' and fills it with tables it needs to store application data.
+2. Run "&lt;INSTALL_DIRECTORY&gt;/sql/system_tables.sql" into MySQL.  This creates the application database 'dbag' and fills it with tables it needs to store application data.
 
- Make a virtual host for Apache with document root at "<INSTALL_DIRECTORY>/public/".  Many tutorials are available on the net for doing this but the basic steps:
+ Make a virtual host for Apache with document root at "&lt;INSTALL_DIRECTORY&gt;/public/".  Many tutorials are available on the net for doing this but the basic steps:
 
 - add this to you httpd.conf:
 
 	Listen 80
 	NameVirtualHost *:80
 	<VirtualHost *:80>
-		DocumentRoot <INSTALL_DIRECTORY>/public
+		DocumentRoot &lt;INSTALL_DIRECTORY&gt;/public
 		ServerName dbag
 	</VirtualHost>
 
@@ -52,7 +52,7 @@ to learn application operation:
 directory structure:
 ==
 
-('./' is used as <INSTALL_DIRECTORY>)
+('./' is used as &lt;INSTALL_DIRECTORY&gt;)
 
 * ./public - document root, public html directory, exposes this application through Apache, contains all html/css/image/javascript assets, !!extra static content should be placed here!!
 * ./javascript - link to ./public/js, javascript files, this is where the majority of the application resides, client javascript using HTML5 Canvas and jQuery
