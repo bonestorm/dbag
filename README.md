@@ -9,6 +9,7 @@ prereqs:
 ===
 
 You need MySQL, Apache, PHP all installed
+You also need Zend Framework 1.10.  Put (or link) the base Zend directory at &lt;INSTALL_DIRECTORY&gt;/vendor so &lt;INSTALL_DIRECTORY&gt;/vendor/Zend/library is where the Zend library is. NOTE: There's got to be a better way to do this.
 
 to install:
 ===
