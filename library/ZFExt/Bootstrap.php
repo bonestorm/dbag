@@ -25,8 +25,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		$response->setHeader('Content-Type', 'text/html; charset=UTF-8', true);
 		$front->setResponse($response);
 
-    		$pluginPageRouter = new ZFExt_PageRouter();
-    		$front->registerPlugin($pluginPageRouter);    
+    		//$pluginPageRouter = new ZFExt_PageRouter();
+    		//$front->registerPlugin($pluginPageRouter);    
 	}
 
 }
