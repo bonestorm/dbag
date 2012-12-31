@@ -2,7 +2,7 @@
 Source.php
 ===
 
-This is the model for the application.  It is in charge of interacting with the RDBMS that you want to work with.  It has the databases that you want to model in the application.
+This is the model for the target of the application.  It is in charge of interacting with the RDBMS that you want to work with.  It has the databases that you want to model in the application.  All interaction with it goes through here.  It is strictly read-only.  That's why this is not so much of a administration tool as it is a database visualization tool.  All writes are done to the Application model, keeping information about the databases there and modeling it as needed.
 
 Application.php:
 ===
