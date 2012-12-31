@@ -1,6 +1,6 @@
 <?php
 
-class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
+class ZFExt_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 
 	//protected function _initLayout(){
 		//Zend_Layout::startMvc(array('layoutPath' => APPLICATION_PATH.'/views/layouts'));

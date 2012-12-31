@@ -14,7 +14,7 @@ You also need Zend Framework 1.10.  Put (or link) the base Zend directory at &lt
 to install:
 ===
 
-1. You need to put MySQL login information in "&lt;INSTALL_DIRECTORY&gt;/modules/login.php".
+1. You need to put MySQL login information in "&lt;INSTALL_DIRECTORY&gt;/config/app_login.ini" and "&lt;INSTALL_DIRECTORY&gt;/config/admin_login.ini".  app_login.ini is for the database installation you want to administer and admin_login.ini is for the database installation that keeps the application information (database 'dbag').  This can be the same database installation.
 
 2. Run "&lt;INSTALL_DIRECTORY&gt;/sql/system_tables.sql" into MySQL.  This creates the application database 'dbag' and fills it with tables it needs to store application data.
 
@@ -61,7 +61,6 @@ directory structure:
 * ./library - database access, application logic.  this is the 'M' in MVC (Model)
 * ./application/views - just front controller's index action since this is a SPA (Single Page Application) and RIA (Rich Internet Application). this is the 'V' in MVC (View)
 * ./application/controllers - routing code, pulls it all together. this is the 'C' in MVC (Controller)
-* ./application/modules - helpers, empty for now
 * ./config - configuration.ini use by Zend/Application for application settings
 * ./vendor - libraries, Zend Framework is installed here
 * ./docs - formal documentation, like this README
