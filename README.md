@@ -18,6 +18,8 @@ to install:
 
 2. Run "&lt;INSTALL_DIRECTORY&gt;/sql/system_tables.sql" into MySQL.  This creates the application database 'dbag' and fills it with tables it needs to store application data.
 
+6203. Run "php &lt;INSTALL_DIRECTORY&gt;/library/ZFExt/Model/import.php" to copy the database names that the application will use from the database install (RDBMS) listed in app_login.ini to the admin database.  You may have a mysqli.sock problem, there's a script in &lt;INSTALL_DIRECTORY&gt;/util/ to help you make a symbolic link if that's a problem.  You cold also just add "table_shema" entries to the "dbag" database using phpMyAdmin if you only want to use a few select databases.
+
 3. Make a virtual host for Apache with document root at "&lt;INSTALL_DIRECTORY&gt;/public/".  Many tutorials are available on the net for doing this but the basic steps:
 
 - add this to you httpd.conf:

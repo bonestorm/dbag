@@ -1,12 +1,16 @@
 <?php
 
+
 if(!defined('PHPUnit_MAIN_METHOD')){
 	define('PHPUnit_MAIN_METHOD', 'AllTests::main');
 }
 
-require_once 'TestHelper.php';
-
-require_once 'ZFExt/Model/EntryTest.php';
+//autoloader, defines path constants, adds paths to include_path
+if(!defined('PATHS_LOADED')){
+    require_once realpath(dirname(__FILE__).'/../TestHelper.php');
+    TestHelper::set();
+    define('PATHS_LOADED',true);
+}
 
 class AllTests {
 	public static function main() {
@@ -14,7 +18,7 @@ class AllTests {
 	}
 
 	public static function suite(){
-		$suite = new PHPUnit_Framework_TestSuite('ZFSTDE Blog Suite');
+		$suite = new PHPUnit_Framework_TestSuite('All Model Tests');
 		$suite->addTest(ZFExt_Model_AllTests::suite());
 		return $suite;
 	}
