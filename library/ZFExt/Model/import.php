@@ -6,9 +6,9 @@
     TestHelper::set();
 
     #no way to do this?
-    #$db_app = ZFExt_Db::getInstance(ZFExt_Db::APPLICATION);
-    #$app_model = new ZFExt_Model_Application($db_app);
-    #$db_names = $app_model->getDatabaseNames();
+    #$db_source = ZFExt_Db::getInstance(ZFExt_Db::SOURCE);
+    #$source_model = new ZFExt_Model_Source($db_source);
+    #$db_names = $source_model->getDatabaseNames();
 
     $config = new Zend_Config_Ini( APPLICATION_ROOT . "/config/app_login.ini", APPLICATION_ENV);
     $params = $config->database->params->toArray();
@@ -27,10 +27,10 @@
         throw Exception("failure getting application's database names for import into admin database");
     } else {
 
-        $db_admin = ZFExt_Db::getInstance(ZFExt_Db::ADMIN);
-        $admin_model = new ZFExt_Model_Admin($db_admin);
+        $db_app = ZFExt_Db::getInstance(ZFExt_Db::APPLICATION);
+        $app_model = new ZFExt_Model_Source($db_app);
 
-        $rows_added = $admin_model->insertDatabaseNames($db_names);
+        $rows_added = $app__model->insertDatabaseNames($db_names);
         if($rows_added == 1){
             echo "{$rows_added} database names added to table_schema\n";
         }

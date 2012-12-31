@@ -2,12 +2,12 @@
 
 class ZFExt_Db {
 
+    protected static $source_path = "/config/source_login.ini";
     protected static $app_path = "/config/app_login.ini";
-    protected static $admin_path = "/config/admin_login.ini";
 
     #there are two allowed database connections
-    const ADMIN = 0;
-    const APPLICATION = 1;
+    const APPLICATION = 0;
+    const SOURCE = 1;
 
     #using the ultra-rare Doubleton design pattern
     protected static $db = array();#some kind of Zend_Db_Adapter
@@ -19,19 +19,19 @@ class ZFExt_Db {
         if(!isset($db[$type])){
 
             switch($type){
-                case ZFExt_Db::ADMIN:
-                    $load_path = static::$admin_path;
-                break;
                 case ZFExt_Db::APPLICATION:
                     $load_path = static::$app_path;
                 break;
+                case ZFExt_Db::SOURCE:
+                    $load_path = static::$source_path;
+                break;
             }
 
-            if($type == ZFExt_Db::APPLICATION){
+            if($type == ZFExt_Db::SOURCE){
                 if(isset($database))
                     $config[$type]->database->params->database = $database;
                 else
-                    throw new Exception("An application database connection must have a second parameter that is the database requested");
+                    throw new Exception("An source database connection must have a second parameter that is the database requested");
             }
 
             static::$config[$type] = new Zend_Config_Ini( APPLICATION_ROOT . $load_path, APPLICATION_ENV);

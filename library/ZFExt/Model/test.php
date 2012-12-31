@@ -7,12 +7,12 @@
     TestHelper::set();
 
 
-    $db_admin = ZFExt_Db::getInstance(ZFExt_Db::ADMIN);
+    $db_app = ZFExt_Db::getInstance(ZFExt_Db::APPLICATION);
 
-    print_r($db_admin);
+    print_r($db_app);
 
-    $admin_model = new ZFExt_Model_Admin($db_admin);
-    $db_names = $admin_model->selectDatabaseNames();
+    $app_model = new ZFExt_Model_Source($db_app);
+    $db_names = $app_model->selectDatabaseNames();
 
     print_r($db_names);
     die;
