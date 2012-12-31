@@ -19,10 +19,10 @@ class AjaxController extends Zend_Controller_Action {
 
 			$this->_helper->contextSwitch()->setAutoJsonSerialization(false)->initContext('json');
 
-            $db_app = ZFExt_Db::getInstance(ZFExt_Db::ADMIN);
+            $db_app = ZFExt_Db::getInstance(ZFExt_Db::APPLICATION);
             //$db_source = ZFExt_Db::getInstance(ZFExt_Db::SOURCE);//don't have the database yet
 
-            $app_model = new ZFExt_Model_Admin($db_app);
+            $app_model = new ZFExt_Model_Application($db_app);
             //$source_model = new ZFExt_Model_Source($db_source);
 
             $this->_helper->json(array(
