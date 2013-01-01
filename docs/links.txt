@@ -1,0 +1,4 @@
+
+#information about zend mysl injections
+http://stackoverflow.com/questions/975009/avoiding-mysql-injections-with-the-zend-db-class
+

@@ -7,5 +7,8 @@ class ZFExt_Model_Source {
     public function __construct($new_db){
         $this->db = $new_db;
     }
+
+    //public function getTables(){//"SHOW tables"
+    //}
     
 }

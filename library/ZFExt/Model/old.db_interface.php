@@ -64,7 +64,7 @@
       $mysqli->select_db($database) or trigger_error("Unable to select database: " . $database, E_USER_ERROR);
 
       //get the tables that are actually in the database
-      $query = "show tables";
+      $query = "SHOW tables";
       $result = $mysqli->query($query) or trigger_error('Query failed: ' . $mysqli->error, E_USER_ERROR);
 
       if($result->num_rows > 0){
@@ -92,7 +92,7 @@
 
       $go_fields = "go.id,go.type,go.x,go.y,go.width,go.height";
   
-      //get the grid joins
+      //get the grid leads
       $query = "
         select
           gj.leads,gj.lead_start,
