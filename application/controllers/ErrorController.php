@@ -16,6 +16,7 @@ class ErrorController extends Zend_Controller_Action {
             break;
         }
         $this->view->message = $error->exception->getMessage();
+        error_log("ERORR CONTROLLER caught error: ".$this->view->message);
     }
 }
 

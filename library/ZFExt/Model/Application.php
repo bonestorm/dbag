@@ -87,17 +87,30 @@ class ZFExt_Model_Application {
 
         $select = $this->db->select()
         ->from(array('go' => 'grid_object'),$this->select_fields['object'])
-        ->join(array('gt' => 'grid_table'),'go.id = gt.grid_object_id', $this->select_fields['table'])
-        ->join(array('gj' => 'grid_join'),'go.id = gj.grid_object_id', $this->select_fields['join'])
-        ->join(array('gc' => 'grid_comment'),'go.id = gc.grid_object_id', $this->select_fields['comment'])
+        ->joinLeft(array('gt' => 'grid_table'),'go.id = gt.grid_object_id', $this->select_fields['table'])
+        ->joinLeft(array('gj' => 'grid_join'),'go.id = gj.grid_object_id', $this->select_fields['join'])
+        ->joinLeft(array('gc' => 'grid_comment'),'go.id = gc.grid_object_id', $this->select_fields['comment'])
         ->where('go.table_schema_id = ?',$db_id);
         
         $result = $this->db->fetchAssoc($select);
 
+        #removes all the empty entries due to the outer joins.  leaves fields in the grid_object and grid_<type>
+        #this would be so much easier in Perl
+        $short_result = array();
+        foreach($result as $row){
+            $short_row = array();
+            foreach($row as $key => $val){
+                if(in_array($key,$this->table_fields['object']) || in_array($key,$this->table_fields[strtolower($row['type'])])){//isset($val)){// && !is_null($val)){
+                    $short_row[$key] = $val;
+                }
+            }
+            $short_result[] = $short_row;
+        }
+
         //todo: collect table_ids, just for grid_tables
         //$table_ids[$row['name']] = $row['id'];//set the real grid_object_id
 
-        return $result;
+        return $short_result;//$select->__toString();
 
         #$query = "
             #select
@@ -121,7 +134,7 @@ class ZFExt_Model_Application {
     #Inserts any grid object
     #Returns the number of records effected
     ##
-    protected function insertObject($fields){
+    public function insertObject($fields){
         if(!in_array($fields->type,$this->object_types)){
             throw Exception("type of this object is invalid, can't insert it");
         }
@@ -143,7 +156,7 @@ class ZFExt_Model_Application {
     #Updates any grid object
     #Returns the number of records effected
     ##
-    protected function updateObject($fields){
+    public function updateObject($fields){
         if(!in_array($fields['type'],$this->object_types)){
             throw Exception("type of this object is invalid, can't update it");
         }
@@ -158,6 +171,26 @@ class ZFExt_Model_Application {
             return $num_udpated;
         }
     }
+    ##
+    #Deletes any grid object
+    #Returns the number of records effected
+    ##
+    public function deleteObject($fields){
+        if(!in_array($fields['type'],$this->object_types)){
+            throw Exception("type of this object is invalid, can't delete it");
+        }
+        $num_deleted = $this->db->delete('grid_'.$fields['type'],"grid_object_id = '".$this->db->quote($fields['id'])."'");
+        if(!isset($num_delete) || $num_delete <= 0){
+            throw Exception("failed to delete object");
+        } else {
+            $num_delete = $this->db->delete('grid_object',"id = '".$this->db->quote($fields['id'])."'");
+            if(!isset($num_delete)){
+                throw Exception("delete {$fields['type']} object failed");
+            }
+            return $num_delete;
+        }
+    }
+
 
     ##
     #Saves any grid object.  This means an update if it exists and an insert if it doesn't.

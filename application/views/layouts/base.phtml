@@ -50,11 +50,25 @@
 
   <!-- application javascript -->
   <!-- <script src="/js/main.js"></script> -->
+
+  <!-- <script data-main="/scripts/test/main" src="scripts/require.js"></script> -->
+
   <script type="text/javascript">
 	$(function(){
-		$.get('/ajax',function(data){
-			console.log(data);
-		});
+
+        //ajax_data = {};
+        //if(database){ajax_data.database = database;}//needed for source model database connection
+
+		$.ajax({
+            url: '/ajax',
+            type: 'POST',
+            data: ajax_data,
+            success: function(data){
+                console.log(data);
+            },
+            dataType: 'json'
+        });
+
 	});
   </script>
 

@@ -9,8 +9,8 @@ class ZFExt_Db {
     const APPLICATION = 0;
     const SOURCE = 1;
 
-    #using the ultra-rare Doubleton design pattern
-    protected static $db = array();#some kind of Zend_Db_Adapter
+    //each 2 element arrays to keep each connection
+    protected static $db = array();#some kind of Zend_Db_Adapter_Abstract
     protected static $config = array();
     
     #will retrieve the right ZFExt_Db object, initializing it first if needed
