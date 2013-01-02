@@ -23,12 +23,31 @@ define(['table','join'],function(TABLE,JOIN){
             OBJ.databases = databases.slice();
         }
 
-        OBJ.set_database_objects = function(database,objects){
+        OBJ.get_current_database = function(){ return _globs.slist.picked_database; }
+        OBJ.get_current_objects = function(){ return OBJ.objects[OBJ.get_current_database()]; }
+
+
+        //data comes back from the server as a big array of arrays.
+        //we need hash with object id keys for 'grid_info' and a hash of table object name keys and id values for 'table_ids'
+        OBJ.process_loaded_objects = function(objects,raw_data){
+          
+            for(var i in raw_data){
+                objects.grid_info[raw_data[i].id] = $.extend({},raw_data[i]);
+                delete objects.grid_info[raw_data[i].id].id;//we don't need the id since it's the key now
+                if(raw_data[i].type == "TABLE"){//if it's a table then we need to be able to look up its id by its name
+                  objects.table_ids[raw_data[i].name] = raw_data[i].id;
+                }
+            }
+
+        }
+
+        OBJ.set_database_objects = function(raw_data){
+            var database = OBJ.get_current_database();
             if($.inArray(database,OBJ.databases) != -1){
-              if(objects === undefined){//if object is null then delete existing one
+              if(raw_data === undefined){//if object is null then delete existing one
                 delete OBJ.objects[database];
               } else {
-                OBJ.objects[database] = objects;//a list of objects
+                OBJ.process_loaded_objects(OBJ.objects[database],raw_data);
               }
             } else {
               alert("no database " + database + " in database info");
@@ -62,6 +81,44 @@ define(['table','join'],function(TABLE,JOIN){
             }
         }
 
+        //creates all the grid objects that are in the retrieved data for the current database
+        OBJ.spawn_grid = function(){
+
+            var obj_added = false;//returns true if at least one objects is added
+
+            var objects = OBJ.get_current_objects();
+            for(var id in objects.grid_info){
+              var obj = objects.grid_info[id];
+              var new_obj;
+              if(obj.type == "TABLE"){
+                //makes its own width even though it is provided. should i allow it to be set here?
+                new_obj = new TABLE(_globs,{cx:parseInt(obj.x),cy:parseInt(obj.y),db_id: id,name: obj.name});
+              }
+              if(obj.type == "JOIN"){
+                new_obj = new JOIN(_globs,{cx:parseInt(obj.x),cy:parseInt(obj.y),db_id: id,
+                  leads: eval(obj.leads),
+                  lead_start: eval(obj.lead_start),
+                  table_from_id: obj.table_from_id,
+                  field_from: obj.field_from,
+                  table_to_id: obj.table_to_id,
+                  field_to: obj.field_to
+                });
+              }
+              if(obj.type == "COMMENT"){
+              }
+              if(new_obj.error != undefined && new_obj.error){
+                alert("Error creating a new object in the grid:" + new_obj.error);
+              } else {
+                _globs.grid.add_obj(new_obj,false);//send it false to tell it to not bother with neighbor notification
+                obj_added = true;
+              }
+            }
+
+            return obj_added;
+
+        }
+
+
         OBJ.call = function(callback,data){
 
 /*
@@ -80,15 +137,15 @@ results:    ['action' => 'getAllObjects', 'database' => 'database_name', 'data' 
 
 saveObject: (value of returned 'inserted' and 'updated' field is the id of the grid object)
 if there is no 'id' then it will insert
-passed in:  ['action' => 'saveObject', 'data' => [            'type' => 'TABLE','x' => 12,'y' => 23...]]
-results:    ['action' => 'saveObject', 'inserted' => 60]
+passed in:  ['action' => 'saveObject', 'data' => ['type' => 'TABLE','x' => 12,'y' => 23...]]
+results:    ['action' => 'inserted', 'id' => 60]
 if there IS an 'id' then it will update
 passed in:  ['action' => 'saveObject', 'data' => ['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...]]
-results:    ['action' => 'saveObject', 'updated' => 60]
+results:    ['action' => 'updated', 'id' => 60]
         
 deleteObject:
 passed in:  ['action' => 'deleteObject', 'id' => 23]
-results:    ['action' => 'deleteObject', deleted => 23]
+results:    ['action' => 'deleted', 'id' => 23]
  
 */
 
@@ -101,36 +158,42 @@ results:    ['action' => 'deleteObject', deleted => 23]
                 data: {stack: [OBJ.call_stack[0].data]},
                 success: function(ret_stack) {
 
-                  var ret_row = ret_stack[0];//only single row stacks for now
+                  var req = OBJ.call_stack[0];//passed in data
+                  var req_action = req.action;
 
-                  var o = OBJ.objects[_globs.slist.picked_database];
-                  var d = OBJ.call_stack[0].data;
-              
-                  if(d.action == "saveObject"){
-                    if(d.name !== undefined){
-                      o.table_ids[d.name] = ret_row.id;
+                  var ret = ret_stack[0];//only single row stacks for now
+                  var action = ret.action;
+
+                  var objs = OBJ.get_current_objects();
+             
+                  if(req_action == "saveObject"){
+
+                    var id = ret.id;
+
+                    //table object insert so add it to table_ids
+                    if(req.name !== undefined){ objs.table_ids[req.name] = id; }
+
+                    if(objs.grid_info[id] === undefined){objs.grid_info[id] = {};}
+                    for(var i in req){
+                        objs.grid_info[id][i] = (i == "leads") ? eval(req[i]) : req[i];
                     }
-                    if(o.grid_info[ret_row.id] === undefined){o.grid_info[ret_row.id] = {};}
-                    var jdata = ret_row.data;
-                    for(var i in jdata){
-                      if(i == "leads"){
-                        o.grid_info[jdata.id][i] = eval(jdata[i]);
-                      } else {
-                        o.grid_info[jdata.id][i] = jdata[i];
-                      }
-                    }
-                  }
-                  if(d.action == "deleteObject"){
-                    if(o.grid_info[d.id] !== undefined){
-                      var gi = o.grid_info[d.id];
-                      if(gi.type.match(/TABLE/i) && o.table_ids[gi.name] !== undefined){
-                        o.table_ids[gi.name] = -1;
-                      }
-                      delete o.grid_info[d.id];
-                    }
+
                   }
 
-                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(ret_row);}
+                  if(req_action == "deleteObject"){
+
+                    var id = ret.id;
+
+                    if(objs.grid_info[id] !== undefined){
+                      var gi = objs.grid_info[id];
+                      if(gi.type.match(/TABLE/i) && objs.table_ids[gi.name] !== undefined){
+                        objs.table_ids[gi.name] = -1;
+                      }
+                      delete objs.grid_info[id];
+                    }
+                  }
+
+                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(ret);}
 
                   OBJ.call_stack.shift();//remove this call
 
@@ -139,8 +202,8 @@ results:    ['action' => 'deleteObject', deleted => 23]
                   } else {
                     ajax_call();
                   }
-
                 }
+
               });
             }
             
@@ -156,61 +219,36 @@ results:    ['action' => 'deleteObject', deleted => 23]
 
         OBJ.load = function(callback){
 
-            function db_info_loaded(objects){
-              OBJ.set_database_objects(_globs.slist.picked_database,objects);//add it to db_info
+            function db_info_loaded(raw_data){
 
-              //reset the grid
-              _globs.grid.reset();
+                //takes the raw data from the server and processes it for use
+                OBJ.set_database_objects(raw_data);//add it to db_info
 
-              //load all the objects
-              var obj_added = false;
-              for(var id in objects.grid_info){
-                var obj = objects.grid_info[id];
-                var new_obj;
-                if(obj.type == "TABLE"){
-                  //makes its own width even though it is provided. should i allow it to be set here?
-                  new_obj = new TABLE(_globs,{cx:parseInt(obj.x),cy:parseInt(obj.y),db_id: id,name: obj.name});
-                }
-                if(obj.type == "JOIN"){
-                  new_obj = new JOIN(_globs,{cx:parseInt(obj.x),cy:parseInt(obj.y),db_id: id,
-                    leads: eval(obj.leads),
-                    lead_start: eval(obj.lead_start),
-                    table_from_id: obj.table_from_id,
-                    field_from: obj.field_from,
-                    table_to_id: obj.table_to_id,
-                    field_to: obj.field_to
-                  });
-                }
-                if(obj.type == "COMMENT"){
-                }
-                if(new_obj.error != undefined && new_obj.error){
-                  alert("Error creating a new object in the grid:" + new_obj.error);
-                } else {
-                  _globs.grid.add_obj(new_obj,false);//send it false to tell it to not bother with neighbor notification
-                  obj_added = true;
-                }
-              }
+                //reset the grid
+                _globs.grid.reset();
 
-              if(obj_added){
-                _globs.refresh();
-              }
+                //load all the objects
+                if(OBJ.spawn_grid()){
+                  _globs.refresh();
+                }
 
-              if(callback !== undefined){callback();}
+                if(callback !== undefined){callback();}
+
             }
 
-            OBJ.call(db_info_loaded,{action: "getAllObjects", database: _globs.slist.picked_database});//load in all the objects for this database              
+            OBJ.call(db_info_loaded,{action: "getAllObjects", database: OBJ.get_current_database()});//load in all the objects for this database              
 
         }
 
         OBJ.load_table_fields = function(tables,callback){
             function db_info_loaded(objects){
               for(var table_name in objects){
-                  OBJ.set_table_fields(_globs.slist.picked_database,table_name,objects[table_name]);
+                  OBJ.set_table_fields(OBJ.get_current_database(),table_name,objects[table_name]);
               }
               if(callback !== undefined){callback();}
             }
 
-            OBJ.call(db_info_loaded,{action: "getTableFields", database: _globs.slist.picked_database, tables: tables});
+            OBJ.call(db_info_loaded,{action: "getTableFields", database: OBJ.get_current_database(), tables: tables});
         }
 
         return OBJ;

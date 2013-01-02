@@ -98,7 +98,7 @@ class ZFExt_Model_Application {
         if(!isset($db_id)){$db_id = $this->curr_db_id;}//use the database already passed in if it's given
 
         if(!is_int($db_id)){
-          $db_id = getTableSchemaId($db_id);
+          $db_id = $this->getTableSchemaId($db_id);
         }
 
         $select = $this->db->select()

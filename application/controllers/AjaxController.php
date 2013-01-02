@@ -30,6 +30,7 @@ class AjaxController extends Zend_Controller_Action {
         $stack = $ajax_data['stack'];
 
 /*
+ 
 getTableFields: gets information about a table (or tables)
 passed in:  ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one','table_two','table_three']]
 results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['Type' => 'int(11)','Null' => true],'field_two' => ['Type......
@@ -40,20 +41,20 @@ results:    ['action' => 'getDatabaseNames', 'data' => ['database1','database2',
 
 getAllObjects:
 passed in:  ['action' => 'getAllObjects', 'database' => 'database_name']
-results:    ['action' => 'getAllObjects', 'data' => [['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...],['id' => 70, 'type' => 'JOIN'....
+results:    ['action' => 'getAllObjects', 'database' => 'database_name', 'data' => [['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...],['id' => 70, 'type' => 'JOIN'....
 
 saveObject: (value of returned 'inserted' and 'updated' field is the id of the grid object)
 if there is no 'id' then it will insert
 passed in:  ['action' => 'saveObject', 'data' => ['type' => 'TABLE','x' => 12,'y' => 23...]]
-results:    ['action' => 'saveObject', 'data' => ['inserted' => 60]]
+results:    ['action' => 'inserted', 'id' => 60]
 if there IS an 'id' then it will update
 passed in:  ['action' => 'saveObject', 'data' => ['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...]]
-results:    ['action' => 'saveObject', 'data' => ['updated' => 60]]
-
+results:    ['action' => 'updated', 'id' => 60]
+        
 deleteObject:
 passed in:  ['action' => 'deleteObject', 'id' => 23]
-results:    ['action' => 'deleteObject', 'data' => ['deleted' => 23]]
-
+results:    ['action' => 'deleted', 'id' => 23]
+ 
 */
 
         //every item in the stack is one of these actions:
@@ -82,19 +83,19 @@ results:    ['action' => 'deleteObject', 'data' => ['deleted' => 23]]
                       $stack_row['data'] = $app_model->getDatabaseNames();
                     break;
                     case 'getAllObjects':
-                      $stack_row['data'] = $app_model->getAllObjects($stack_row['data']);
+                      $stack_row['data'] = $app_model->getAllObjects($stack_row['database']);
                     break;
                     case 'saveObject':
                       $res = $app_model->saveObject($stack_row['data']);
                       if($res['action'] == "inserted"){
-                          $stack_row['data'] = array('inserted' => $res['id']);
+                          $stack_row = array('action' => 'inserted', 'id' => $res['id']);
                       } else {//update
-                          $stack_row['data'] = array('updated' => $res['id']);
+                          $stack_row = array('action' => 'updated', 'id' => $res['id']);
                       }
                     break;
                     case 'deleteObject':
                       $num_del = $app_model->deleteObject($stack_row['data']);
-                      if($num_del > 0){$stack_row['data'] = array('deleted' => $stack_row['data']['id']);}
+                      if($num_del > 0){ $stack_row = array('action' => 'deleted', 'id' => $res['id']); }
                     break;
                 }
             } else {

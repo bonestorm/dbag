@@ -298,7 +298,6 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
           if(type == "db"){
 
             function set_db_tab(dbs){
-console.log(dbs);
               var db_names = dbs.data;
               if(db_names !== undefined){
                 _globs.db_interface.set_databases(db_names);
