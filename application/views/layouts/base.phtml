@@ -27,7 +27,7 @@
     <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
   <![endif]-->
 
-  <?php echo $this->layout()->content; ?>
+  <!-- <?php echo $this->layout()->content; ?> -->
 
   <div id="container">
     <div id="main" role="main">
@@ -48,16 +48,16 @@
   <script defer src="/js/libs/plugins.js"></script>
   <script defer src="/js/libs/json.js"></script>
 
-  <!-- application javascript -->
-  <!-- <script src="/js/main.js"></script> -->
-
-  <!-- <script data-main="/scripts/test/main" src="scripts/require.js"></script> -->
+  <!-- require loads up the application -->
+  <script data-main="/js/bootstrap" src="/js/libs/require.js"></script> 
 
   <script type="text/javascript">
 	$(function(){
+    
 
-        //ajax_data = {};
-        //if(database){ajax_data.database = database;}//needed for source model database connection
+/*
+        ajax_data = {};
+        if(database){ajax_data.database = database;}//needed for source model database connection
 
 		$.ajax({
             url: '/ajax',
@@ -68,6 +68,7 @@
             },
             dataType: 'json'
         });
+*/
 
 	});
   </script>

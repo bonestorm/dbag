@@ -1,12 +1,15 @@
 
+define(function(){
+
 /*
-    _globs.context.font = _font_height+"px Verdana";
+    context.font = _font_height+"px Verdana";
     
-    var metrics = _globs.context.measureText(OBJ.name);
+    var metrics = context.measureText(OBJ.name);
     OBJ.text_width = metrics.width+8;//+8 for a little breathing room
 */
 
-function namespace(namespaceString) {
+var ret = {};
+ret.namespace = function(namespaceString) {
     var parts = namespaceString.split('.'),
         parent = window,
         currentPart = '';    
@@ -32,7 +35,7 @@ function namespace(namespaceString) {
  * @param {Boolean} fill Whether to fill the rectangle. Defaults to false. 
  * @param {Boolean} stroke Whether to stroke the rectangle. Defaults to true. 
  */
-function roundRect(ctx, x, y, width, height, radius) {
+ret.roundRect = function(ctx, x, y, width, height, radius) {
     var cornerRadius = { upperLeft: 0, upperRight: 0, lowerLeft: 0, lowerRight: 0 };
     for (var side in cornerRadius) {
       if (typeof radius === "object" && radius[side] !== undefined) {
@@ -56,7 +59,7 @@ function roundRect(ctx, x, y, width, height, radius) {
 
 } 
 
-function roundTab(ctx, x, y, w, h, tab_x, tab_w, tab_h, r) {//w=width,h=height,r=radius
+ret.roundTab = function(ctx, x, y, w, h, tab_x, tab_w, tab_h, r) {//w=width,h=height,r=radius
 
     var c_x,c_y;
 
@@ -89,7 +92,7 @@ function roundTab(ctx, x, y, w, h, tab_x, tab_w, tab_h, r) {//w=width,h=height,r
 
 } 
 
-function openDot(ctx,x,y,dot_radius,connect_radius,quad){
+ret.openDot = function(ctx,x,y,dot_radius,connect_radius,quad){
 
   ctx.translate(x,y);
   ctx.rotate((Math.PI/2)*quad);
@@ -101,7 +104,7 @@ function openDot(ctx,x,y,dot_radius,connect_radius,quad){
 
 }
 
-function cutDown(str,limit){
+ret.cutDown = function(str,limit){
   if(limit === undefined){limit = 100;}
   if(str.length > limit){
     str = str.substr(0,limit-3)+"...";
@@ -109,7 +112,7 @@ function cutDown(str,limit){
   return str;
 }
 
-function clone(obj){
+ret.clone = function(obj){
     if(obj == null || typeof(obj) != 'object')
         return obj;
 
@@ -119,3 +122,6 @@ function clone(obj){
 
     return temp;
 }
+return $ret
+
+});
