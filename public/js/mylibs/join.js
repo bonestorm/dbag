@@ -822,8 +822,10 @@ define(function(){
           }
 
           var pass_vars = {
-            mode: "save_object", database: _globs.slist.picked_database, type: "JOIN",
-            id: OBJ.db_id,
+            action: "saveObject",
+            type: "JOIN",
+            database: _globs.slist.picked_database,//will be converted to table_schema_id
+            id: OBJ.db_id,//if this is empty, does an insert, if it's there, does an update
             x: OBJ.cx, y: OBJ.cy,
             leads: "[" + OBJ.leads.join(',') + "]",
             lead_start: "[" + OBJ.lead_start.join(',') + "]",
@@ -851,7 +853,7 @@ define(function(){
         //required for all grid objects
         OBJ.delete_from_db = function(callback){
           if(OBJ.db_id !== undefined){
-            var json = _globs.db_interface.call(callback,{mode: "delete_object", database: _globs.slist.picked_database, id: OBJ.db_id});
+            var json = _globs.db_interface.call(callback,{action: "deleteObject", id: OBJ.db_id});
           } else {
             callback();
           }

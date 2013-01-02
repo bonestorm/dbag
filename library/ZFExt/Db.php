@@ -16,6 +16,8 @@ class ZFExt_Db {
     #will retrieve the right ZFExt_Db object, initializing it first if needed
     public static function getInstance($type, $database = null) {
 
+        //will this still work if we call it for source database and a different database?
+
         if(!isset($db[$type])){
 
             switch($type){

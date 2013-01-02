@@ -298,8 +298,10 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
           if(type == "db"){
 
             function set_db_tab(dbs){
-              if(dbs !== undefined){
-                _globs.db_interface.set_databases(dbs);
+console.log(dbs);
+              var db_names = dbs.data;
+              if(db_names !== undefined){
+                _globs.db_interface.set_databases(db_names);
               }
               if(_globs.db_interface["databases"].length > 0){
                 OBJ.tabs["db"].set_to([//add an input for selecting the database to load
@@ -330,7 +332,7 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
        
             //load all the names of the databases if they haven't already been loaded
             if(_globs.db_interface["databases"].length == 0){
-              _globs.db_interface.call(set_db_tab,{mode: "databases"});
+              _globs.db_interface.call(set_db_tab,{action: "getDatabaseNames"});
             } else {
               set_db_tab();
             }

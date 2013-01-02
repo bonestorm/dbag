@@ -177,7 +177,7 @@ define(['base'],function(BASE){
             if(callback !== undefined){callback(json);}
           }
 
-          var pass_vars = {mode: "save_object", database: _globs.slist.picked_database, type: "TABLE", name: OBJ.name, x: OBJ.cx, y: OBJ.cy, width: _cells_wide};
+          var pass_vars = {action: "saveObject", database: _globs.slist.picked_database, type: "TABLE", name: OBJ.name, x: OBJ.cx, y: OBJ.cy, width: _cells_wide};
 
           if(o.table_ids[OBJ.name] !== undefined && o.table_ids[OBJ.name] != -1){
             pass_vars.id = o.table_ids[OBJ.name];
@@ -189,7 +189,7 @@ define(['base'],function(BASE){
         //required for all grid objects
         OBJ.delete_from_db = function(callback){
           if(OBJ.db_id !== undefined){
-            var json = _globs.db_interface.call(callback,{mode: "delete_object", database: _globs.slist.picked_database, id: OBJ.db_id});//name: OBJ.name});
+            var json = _globs.db_interface.call(callback,{action: "deleteObject", id: OBJ.db_id});//name: OBJ.name});
           }
         }
 

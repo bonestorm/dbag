@@ -5,14 +5,14 @@ define(['table','join'],function(TABLE,JOIN){
 
         var _globs = globs; 
 
-        var ajax_load = $("<div style='margin:350px auto;width: 32px;'><img src='img/load.gif' alt='loading...' /></div>");
+        var ajax_load = $("<div style='margin:350px auto;width: 32px;'><img src='img/load3.gif' alt='loading...' /></div>");
 
         var OBJ = {
 
             ajax_load: ajax_load,
             call_stack: [],
 
-            db_interface_script: "db_interface.php",
+            db_interface_link: "/ajax",
             databases: [],
             objects: [],
             fields: [],
@@ -64,31 +64,63 @@ define(['table','join'],function(TABLE,JOIN){
 
         OBJ.call = function(callback,data){
 
+/*
+ 
+getTableFields: gets information about a table (or tables)
+passed in:  ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one','table_two','table_three']]
+results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['Type' => 'int(11)','Null' => true],'field_two' => ['Type......
+
+getDatabaseNames: gets names of all the databases in dbag.table_schema
+passed in:  ['action' => 'getDatabaseNames']
+results:    ['action' => 'getDatabaseNames', 'data' => ['database1','database2','database3'....
+
+getAllObjects:
+passed in:  ['action' => 'getAllObjects', 'database' => 'database_name']
+results:    ['action' => 'getAllObjects', 'database' => 'database_name', 'data' => [['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...],['id' => 70, 'type' => 'JOIN'....
+
+saveObject: (value of returned 'inserted' and 'updated' field is the id of the grid object)
+if there is no 'id' then it will insert
+passed in:  ['action' => 'saveObject', 'data' => [            'type' => 'TABLE','x' => 12,'y' => 23...]]
+results:    ['action' => 'saveObject', 'inserted' => 60]
+if there IS an 'id' then it will update
+passed in:  ['action' => 'saveObject', 'data' => ['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...]]
+results:    ['action' => 'saveObject', 'updated' => 60]
+        
+deleteObject:
+passed in:  ['action' => 'deleteObject', 'id' => 23]
+results:    ['action' => 'deleteObject', deleted => 23]
+ 
+*/
+
             function ajax_call(){
               $.ajax({
-                url: OBJ.db_interface_script,
+                type: 'POST',
+                url: OBJ.db_interface_link,
                 async: true,
                 dataType: 'json',
-                data: OBJ.call_stack[0].data,
-                success: function(json) {
+                data: {stack: [OBJ.call_stack[0].data]},
+                success: function(ret_stack) {
+
+                  var ret_row = ret_stack[0];//only single row stacks for now
 
                   var o = OBJ.objects[_globs.slist.picked_database];
                   var d = OBJ.call_stack[0].data;
               
-                  if(d.mode == "save_object"){
+                  if(d.action == "saveObject"){
                     if(d.name !== undefined){
-                      o.table_ids[d.name] = json.id;
+                      o.table_ids[d.name] = ret_row.id;
                     }
-                    if(o.grid_info[json.id] === undefined){o.grid_info[json.id] = {};}
-                    for(var i in json){
+                    if(o.grid_info[ret_row.id] === undefined){o.grid_info[ret_row.id] = {};}
+                    var jdata = ret_row.data;
+                    for(var i in jdata){
                       if(i == "leads"){
-                        o.grid_info[json.id][i] = eval(json[i]);
+                        o.grid_info[jdata.id][i] = eval(jdata[i]);
                       } else {
-                        o.grid_info[json.id][i] = json[i];
+                        o.grid_info[jdata.id][i] = jdata[i];
                       }
                     }
                   }
-                  if(d.mode == "delete_object"){
+                  if(d.action == "deleteObject"){
                     if(o.grid_info[d.id] !== undefined){
                       var gi = o.grid_info[d.id];
                       if(gi.type.match(/TABLE/i) && o.table_ids[gi.name] !== undefined){
@@ -98,7 +130,7 @@ define(['table','join'],function(TABLE,JOIN){
                     }
                   }
 
-                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(json);}
+                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(ret_row);}
 
                   OBJ.call_stack.shift();//remove this call
 
@@ -166,7 +198,7 @@ define(['table','join'],function(TABLE,JOIN){
               if(callback !== undefined){callback();}
             }
 
-            OBJ.call(db_info_loaded,{mode: "database_data", database: _globs.slist.picked_database});//load in all the objects for this database              
+            OBJ.call(db_info_loaded,{action: "getAllObjects", database: _globs.slist.picked_database});//load in all the objects for this database              
 
         }
 
@@ -178,7 +210,7 @@ define(['table','join'],function(TABLE,JOIN){
               if(callback !== undefined){callback();}
             }
 
-            OBJ.call(db_info_loaded,{mode: "table_data", database: _globs.slist.picked_database, tables: tables});
+            OBJ.call(db_info_loaded,{action: "getTableFields", database: _globs.slist.picked_database, tables: tables});
         }
 
         return OBJ;

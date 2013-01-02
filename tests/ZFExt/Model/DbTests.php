@@ -14,7 +14,7 @@ class ZFExt_Model_DbTests extends PHPUnit_Framework_TestCase {
         //print_r($db_app);
     
         $app_model = new ZFExt_Model_Application($db_app);
-        $db_names = $app_model->selectDatabaseNames();
+        $db_names = $app_model->getDatabaseNames();
     
         $this->assertTrue(isset($db_names),"selected database names should return something");
         $this->assertInternalType('array',$db_names,"selected database names should be returning an array");

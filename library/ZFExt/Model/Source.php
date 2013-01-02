@@ -19,12 +19,12 @@ class ZFExt_Model_Source {
         $res = array();
         foreach($tables as $table){
             $stmt = $this->db->query("SHOW columns from '".$this->db->quote($table)."'";
-            if(!array_key_exists($table,$res){
+            if(!array_key_exists($table,$res)){//might be duplicate tables so don't select it again
                 $res[$table] = array();
-            }
-            while($row = $stmt->fetch()){
-                foreach(array('Type','Null') as $ff){
-                    $res[$table][$row['Field']][strtolower($ff)] = $row[$ff];
+                while($row = $stmt->fetch()){
+                    foreach(array('Type','Null') as $ff){
+                        $res[$table][$row['Field']][strtolower($ff)] = $row[$ff];
+                    }
                 }
             }
         }

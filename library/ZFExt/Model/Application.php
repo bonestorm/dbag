@@ -20,7 +20,7 @@ class ZFExt_Model_Application {
         $this->table_aliases = array('object' => 'go','table' => 'gt','join' => 'gj','comment' => 'gc');
 
         $this->table_fields = array( 
-            'object' => array('id','type','x','y','width','height'),
+            'object' => array('id','table_schema_id','type','x','y','width','height'),
             'table' => array('name'),
             'join' => array('leads','lead_start','table_from_id','field_from','table_to_id','field_to'),
             'comment' => array('comment')
@@ -56,7 +56,7 @@ class ZFExt_Model_Application {
     ##
     #Selects all of the names of the databases inserted
     ##
-    public function selectDatabaseNames(){
+    public function getDatabaseNames(){
 
         #$this->db->setFetchMode(Zend_Db::FETCH_COLUMN);#support for this is very sketchy
         $select = $this->db->select()->from('table_schema');
@@ -78,12 +78,28 @@ class ZFExt_Model_Application {
         $this->curr_db_id = $new_db_id;
     }
 
+    protected function getTableSchemaId($database){
+
+      //get the table_schema_id from the database name
+      $select = $this->db->select('table_schema_id')->from('table_schema')->where('id = ?',$database);
+      $table_schema_id = $this->db->fetchOne($select);
+      if(!isset($table_schema_id)){
+        throw Exception("failed to find the database id from a database name");
+      }
+      return $table_schema_id;
+
+    }
+
     ##
     #Selects all of the grid object information for a selected database
     ##
-    public function selectAllObjects($db_id = null){
+    public function getAllObjects($db_id = null){
 
         if(!isset($db_id)){$db_id = $this->curr_db_id;}//use the database already passed in if it's given
+
+        if(!is_int($db_id)){
+          $db_id = getTableSchemaId($db_id);
+        }
 
         $select = $this->db->select()
         ->from(array('go' => 'grid_object'),$this->select_fields['object'])
@@ -107,10 +123,11 @@ class ZFExt_Model_Application {
             $short_result[] = $short_row;
         }
 
+        return $short_result;//$select->__toString();
+
         //todo: collect table_ids, just for grid_tables
         //$table_ids[$row['name']] = $row['id'];//set the real grid_object_id
 
-        return $short_result;//$select->__toString();
 
         #$query = "
             #select
@@ -132,7 +149,7 @@ class ZFExt_Model_Application {
 
     ##
     #Inserts any grid object
-    #Returns the number of records effected
+    #Returns the id of the new grid object
     ##
     public function insertObject($fields){
         if(!in_array($fields->type,$this->object_types)){
@@ -148,7 +165,7 @@ class ZFExt_Model_Application {
             if(!isset($num_inserted)){
                 throw Exception("insert {$fields['type']} object failed");
             }
-            return $num_inserted;
+            return $fields['id'];
         }
     }
 
@@ -156,7 +173,7 @@ class ZFExt_Model_Application {
     #Updates any grid object
     #Returns the number of records effected
     ##
-    public function updateObject($fields){
+    protected function updateObject($fields){
         if(!in_array($fields['type'],$this->object_types)){
             throw Exception("type of this object is invalid, can't update it");
         }
@@ -175,7 +192,18 @@ class ZFExt_Model_Application {
     #Deletes any grid object
     #Returns the number of records effected
     ##
-    public function deleteObject($fields){
+    protected function deleteObject($fields){
+
+        //get type if not passed in
+        if(!isset($fields['type'])){
+          $select = $this->db->select('type')->from('grid_object')->where('id = ?',$fields['id']);
+          $fields['type'] = $this->db->fetchOne($select);
+        }
+
+        if(!isset($fields['type'])){
+            throw Exception("type is a required field to delete a grid object, it is not provided");
+        }
+
         if(!in_array($fields['type'],$this->object_types)){
             throw Exception("type of this object is invalid, can't delete it");
         }
@@ -196,12 +224,38 @@ class ZFExt_Model_Application {
     #Saves any grid object.  This means an update if it exists and an insert if it doesn't.
     #Returns the number of records effected
     ##
-    public function saveObject($fields){//if 'id' in $fields exists then updates it, else creates it
-  
-        if(!isset($fields['id'])){
-            return $this->insertObject($fields);//creates object and adds new $field->id
+    public function saveObject($fields,$database = null){
+
+        if(isset($fields['type'])){
+          $fields['type'] = strtoupper($field['type']);
+        }
+
+        //'id' is the grid object id,'table_schema_id' is the database id
+
+        //if 'id' in $fields exists then updates it, else creates it
+
+        if(!isset($fields['id']) && !is_null($fields['id'])){
+
+            //see if we need to get the table_schema_id, get it if we do
+            if(!isset($fields['table_schema_id'])){
+              if(!isset($database)){
+                throw Exception("not given any database information for the grid object insert");
+              } else {
+                $fields['table_schema_id'] = $this->getTableSchemaId($database);
+              }
+            }
+
+            //insert it
+            $new_id = $this->insertObject($fields);//creates object and adds new $field->id
+            return array('action' => 'inserted', 'id' => $new_id);
+
         } else {
-            return $this->updateObject($fields);
+
+            //update it
+            //!!should check this return value
+            $this->updateObject($fields);
+            return array('action' => 'updated', 'id' => $fields['id']);
+
         }
 
     }

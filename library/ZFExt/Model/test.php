@@ -12,7 +12,7 @@
     print_r($db_app);
 
     $app_model = new ZFExt_Model_Source($db_app);
-    $db_names = $app_model->selectDatabaseNames();
+    $db_names = $app_model->getDatabaseNames();
 
     print_r($db_names);
     die;
