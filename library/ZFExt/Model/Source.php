@@ -12,14 +12,14 @@ class ZFExt_Model_Source {
     #Selects field information in a list of tables
     #It includes the field type and whether it can be null or not
     ##
-    public function selectTableFields($tables){
+    public function getTableFields($tables){
 
         if(gettype($tables) == "string"){$tables = array($tables);}//in case just one table is passed in
 
         $res = array();
         foreach($tables as $table){
-            $stmt = $this->db->query("SHOW columns from '".$this->db->quote($table)."'";
             if(!array_key_exists($table,$res)){//might be duplicate tables so don't select it again
+                $stmt = $this->db->query("SHOW columns from '".$this->db->quote($table)."'");
                 $res[$table] = array();
                 while($row = $stmt->fetch()){
                     foreach(array('Type','Null') as $ff){
@@ -31,5 +31,14 @@ class ZFExt_Model_Source {
         return $res;
 
     }
+
+    ##
+    #Selects all table names in the connected database
+    ##
+    public function getTableNames(){
+      return $this->db->fetchCol("SHOW tables");
+    }
+
+    
     
 }

@@ -297,201 +297,201 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
           //  "db" -- starts as this so we can choose which database to load
           if(type == "db"){
 
-            function set_db_tab(dbs){
-              var db_names = dbs.data;
-              if(db_names !== undefined){
-                _globs.db_interface.set_databases(db_names);
-              }
-              if(_globs.db_interface["databases"].length > 0){
-                OBJ.tabs["db"].set_to([//add an input for selecting the database to load
-                  new INPUT_OBJECTS.input_title(_globs,{title: "Pick a database to load",height: OBJ.input_height,callback: function(){alert('hi');}}),
-                  new INPUT_OBJECTS.input_dropdown(_globs,{
-                    title: "Pick database to load",show_title: true,
-                    data: _globs.db_interface["databases"],
-                    height: OBJ.input_height,
-                    callback: function(picked_database){
-                      if(picked_database != undefined){// > 0){
-                        OBJ.picked_database = picked_database;
-                        //after the db_interface loads, it changes the tab input to pick a table to place
-                        _globs.db_interface.load(function(){OBJ.start_input_type("tables")});
+              function set_db_tab(dbs){
+                var db_names = dbs.data;
+                if(db_names !== undefined){
+                  _globs.db_interface.set_databases(db_names);
+                }
+                if(_globs.db_interface["databases"].length > 0){
+                  OBJ.tabs["db"].set_to([//add an input for selecting the database to load
+                    new INPUT_OBJECTS.input_title(_globs,{title: "Pick a database to load",height: OBJ.input_height,callback: function(){alert('hi');}}),
+                    new INPUT_OBJECTS.input_dropdown(_globs,{
+                      title: "Pick database to load",show_title: true,
+                      data: _globs.db_interface["databases"],
+                      height: OBJ.input_height,
+                      callback: function(picked_database){
+                        if(picked_database != undefined){// > 0){
+                          OBJ.picked_database = picked_database;
+                          //after the db_interface loads, it changes the tab input to pick a table to place
+                          _globs.db_interface.load(function(){OBJ.start_input_type("tables")});
+                        }
+                        _globs.refresh();
                       }
-                      _globs.refresh();
-                    }
-                  })
-                ]);
-              } else {
-                OBJ.tabs["db"].set_to([//no databases found
-                  new INPUT_OBJECTS.input_title(_globs,{title: "No databases found",height: OBJ.input_height,callback: function(){alert('hi');}})
-                ]);
+                    })
+                  ]);
+                } else {
+                  OBJ.tabs["db"].set_to([//no databases found
+                    new INPUT_OBJECTS.input_title(_globs,{title: "No databases found",height: OBJ.input_height,callback: function(){alert('hi');}})
+                  ]);
+                }
+                OBJ.tab_footprint();
+                OBJ.active_tab = "db";
+                _globs.refresh();
               }
-              OBJ.tab_footprint();
-              OBJ.active_tab = "db";
-              _globs.refresh();
-            }
-       
-            //load all the names of the databases if they haven't already been loaded
-            if(_globs.db_interface["databases"].length == 0){
-              _globs.db_interface.call(set_db_tab,{action: "getDatabaseNames"});
-            } else {
-              set_db_tab();
-            }
+         
+              //load all the names of the databases if they haven't already been loaded
+              if(_globs.db_interface["databases"].length == 0){
+                _globs.db_interface.call(set_db_tab,{action: "getDatabaseNames"});
+              } else {
+                set_db_tab();
+              }
 
           }
 
           //  "tables" -- once a database is picked and loaded, we select a table to either place in the graph or add to a select
           if(type == "tables"){
 
-            var tables = _globs.db_interface["objects"][OBJ.picked_database];
+              var tables = _globs.db_interface["objects"][OBJ.picked_database];
 
-            //collect tables that haven't been placed
-            var all_table_names = Object.keys(tables.table_ids);
-            var table_names = [];
-            for(var i in all_table_names){
-              if(tables.table_ids[all_table_names[i]] < 0){//== -1 then it hasn't been placed
-                table_names.push( all_table_names[i]);
+              //collect tables that haven't been placed
+              var all_table_names = Object.keys(tables.table_ids);
+              var table_names = [];
+              for(var i in all_table_names){
+                if(tables.table_ids[all_table_names[i]] < 0){//== -1 then it hasn't been placed
+                  table_names.push( all_table_names[i]);
+                }
               }
-            }
 
 
-            var tabs = [];
-            if(table_names.length > 0){
-              var all_placed = (OBJ.all_tables_placed !== undefined && OBJ.all_tables_placed);
-              if(!all_placed && OBJ.active_tab == "tables"){
-                OBJ.tabs["tables"].sections[1].set_data(table_names);//just update the options
+              var tabs = [];
+              if(table_names.length > 0){
+                var all_placed = (OBJ.all_tables_placed !== undefined && OBJ.all_tables_placed);
+                if(!all_placed && OBJ.active_tab == "tables"){
+                  OBJ.tabs["tables"].sections[1].set_data(table_names);//just update the options
+                } else {
+                  tabs = [
+                    new INPUT_OBJECTS.input_title(_globs,{title: "Pick a table:",height: OBJ.input_height,callback: function(){alert('hi');}}),
+                    new INPUT_OBJECTS.input_dropdown(_globs,{
+                      data: table_names,
+                      height: OBJ.input_height,
+                      callback: function (picked_table){
+
+                        OBJ.picked_table = picked_table;
+                        var shift_down = 0;
+                        while(shift_down < 12*4){
+                          var _new_table = new TABLE(_globs,{cx:_globs.grid.window.x*4,cy:_globs.grid.window.y*4+shift_down,name: picked_table});
+                          if(_new_table.error == undefined || !_new_table.error){
+
+                            //save on creation
+                            _new_table.save_to_db(function(){OBJ.start_input_type("tables");_globs.refresh();});
+                            _globs.grid.add_obj(_new_table);
+
+                            _globs.refresh();
+
+                            break;//success
+                          }
+                          shift_down++;
+                        }
+
+                        //now just sit there and show the table that was picked
+                        _globs.refresh();
+                      }
+                    })
+                  ];
+                  OBJ.all_tables_placed = false;
+                  OBJ.active_tab = "tables";
+                  OBJ.tabs["tables"].set_to(tabs);
+                  OBJ.tab_footprint();
+                }
+                OBJ.tabs["tables"].sections[1].reset();//no picked options yet
+
               } else {
                 tabs = [
-                  new INPUT_OBJECTS.input_title(_globs,{title: "Pick a table:",height: OBJ.input_height,callback: function(){alert('hi');}}),
-                  new INPUT_OBJECTS.input_dropdown(_globs,{
-                    data: table_names,
-                    height: OBJ.input_height,
-                    callback: function (picked_table){
-
-                      OBJ.picked_table = picked_table;
-                      var shift_down = 0;
-                      while(shift_down < 12*4){
-                        var _new_table = new TABLE(_globs,{cx:_globs.grid.window.x*4,cy:_globs.grid.window.y*4+shift_down,name: picked_table});
-                        if(_new_table.error == undefined || !_new_table.error){
-
-                          //save on creation
-                          _new_table.save_to_db(function(){OBJ.start_input_type("tables");_globs.refresh();});
-                          _globs.grid.add_obj(_new_table);
-
-                          _globs.refresh();
-
-                          break;//success
-                        }
-                        shift_down++;
-                      }
-
-                      //now just sit there and show the table that was picked
-                      _globs.refresh();
-                    }
-                  })
+                  new INPUT_OBJECTS.input_title(_globs,{title: "All tables placed",height: OBJ.input_height,callback: function(){alert('hi');}})
                 ];
-                OBJ.all_tables_placed = false;
+                OBJ.all_tables_placed = true;
                 OBJ.active_tab = "tables";
                 OBJ.tabs["tables"].set_to(tabs);
                 OBJ.tab_footprint();
               }
-              OBJ.tabs["tables"].sections[1].reset();//no picked options yet
-
-            } else {
-              tabs = [
-                new INPUT_OBJECTS.input_title(_globs,{title: "All tables placed",height: OBJ.input_height,callback: function(){alert('hi');}})
-              ];
-              OBJ.all_tables_placed = true;
-              OBJ.active_tab = "tables";
-              OBJ.tabs["tables"].set_to(tabs);
-              OBJ.tab_footprint();
-            }
-            _globs.refresh();
+              _globs.refresh();
           }
 
           if(type == "join"){
 
-            //not linked
-            if(tab_data === undefined || !tab_data.link || !tab_data.link.linked){return;}
+              //not linked
+              if(tab_data === undefined || !tab_data.link || !tab_data.link.linked){return;}
 
-            OBJ.tab_data = tab_data;//the join object
+              OBJ.tab_data = tab_data;//the join object
 
-            var o = _globs.db_interface.objects[_globs.slist.picked_database];
+              var o = _globs.db_interface.objects[_globs.slist.picked_database];
 
-            var start_table = o.grid_info[OBJ.tab_data.link.start].name;
-            var end_table = o.grid_info[OBJ.tab_data.link.end].name;
+              var start_table = o.grid_info[OBJ.tab_data.link.start].name;
+              var end_table = o.grid_info[OBJ.tab_data.link.end].name;
 
 
-            function make_join_input(){
+              function make_join_input(){
 
-              if(OBJ.active_tab == "join" && OBJ.tab_data == tab_data){//if it's still on the join tab and not cancelled
-                var f = _globs.db_interface.fields[_globs.slist.picked_database];
-      //          alert(f[start_table]);
-                var start_data = [];
-                for(var fname in f[start_table]){
-                  start_data.push(fname);
-                }
-                var end_data = [];
-                for(var fname in f[end_table]){
-                  end_data.push(fname);
-                }
-
-                var start_dropdown_options = {
-                  data: start_data,height: OBJ.input_height,
-                  callback: function (picked_field){
-                    if(picked_field.length > 0){
-                      OBJ.tab_data.link.start_field = picked_field;
-                      OBJ.tab_data.save_to_db();                  
-                    }
-                    _globs.refresh();
+                if(OBJ.active_tab == "join" && OBJ.tab_data == tab_data){//if it's still on the join tab and not cancelled
+                  var f = _globs.db_interface.fields[_globs.slist.picked_database];
+        //          alert(f[start_table]);
+                  var start_data = [];
+                  for(var fname in f[start_table]){
+                    start_data.push(fname);
                   }
-                };
-
-                var end_dropdown_options = {
-                  data: end_data,height: OBJ.input_height,
-                  callback: function (picked_field){
-                    if(picked_field.length > 0){
-                      OBJ.tab_data.link.end_field = picked_field;
-                      OBJ.tab_data.save_to_db();
-                    }
-                    _globs.refresh();
+                  var end_data = [];
+                  for(var fname in f[end_table]){
+                    end_data.push(fname);
                   }
-                };
+
+                  var start_dropdown_options = {
+                    data: start_data,height: OBJ.input_height,
+                    callback: function (picked_field){
+                      if(picked_field.length > 0){
+                        OBJ.tab_data.link.start_field = picked_field;
+                        OBJ.tab_data.save_to_db();                  
+                      }
+                      _globs.refresh();
+                    }
+                  };
+
+                  var end_dropdown_options = {
+                    data: end_data,height: OBJ.input_height,
+                    callback: function (picked_field){
+                      if(picked_field.length > 0){
+                        OBJ.tab_data.link.end_field = picked_field;
+                        OBJ.tab_data.save_to_db();
+                      }
+                      _globs.refresh();
+                    }
+                  };
 
 
-                if(OBJ.tab_data.link !== undefined){
-                  start_dropdown_options.picked = OBJ.tab_data.link.start_field;
-                  end_dropdown_options.picked = OBJ.tab_data.link.end_field;
+                  if(OBJ.tab_data.link !== undefined){
+                    start_dropdown_options.picked = OBJ.tab_data.link.start_field;
+                    end_dropdown_options.picked = OBJ.tab_data.link.end_field;
+                  }
+
+                  var tabs = [
+                    new INPUT_OBJECTS.input_title(_globs,{title: start_table+".",height: OBJ.input_height,callback: function(){alert('hi');}}),
+                    new INPUT_OBJECTS.input_dropdown(_globs,start_dropdown_options),
+                    new INPUT_OBJECTS.input_title(_globs,{title: "<-- joined to -->",height: OBJ.input_height}),
+                    new INPUT_OBJECTS.input_title(_globs,{title: end_table+".",height: OBJ.input_height,callback: function(){alert('hi');}}),
+                    new INPUT_OBJECTS.input_dropdown(_globs,end_dropdown_options)
+                  ];
+                  OBJ.tabs["join"].set_to(tabs);
+                  OBJ.tab_footprint();
+                  _globs.refresh();
+
                 }
-
-                var tabs = [
-                  new INPUT_OBJECTS.input_title(_globs,{title: start_table+".",height: OBJ.input_height,callback: function(){alert('hi');}}),
-                  new INPUT_OBJECTS.input_dropdown(_globs,start_dropdown_options),
-                  new INPUT_OBJECTS.input_title(_globs,{title: "<-- joined to -->",height: OBJ.input_height}),
-                  new INPUT_OBJECTS.input_title(_globs,{title: end_table+".",height: OBJ.input_height,callback: function(){alert('hi');}}),
-                  new INPUT_OBJECTS.input_dropdown(_globs,end_dropdown_options)
-                ];
-                OBJ.tabs["join"].set_to(tabs);
-                OBJ.tab_footprint();
-                _globs.refresh();
 
               }
 
-            }
+              OBJ.active_tab = "join";
+              OBJ.tabs["join"].set_to([
+                new INPUT_OBJECTS.input_title(_globs,{title: "loading field information",height: OBJ.input_height,callback: function(){alert('hi');}}),
+              ]);
 
-            OBJ.active_tab = "join";
-            OBJ.tabs["join"].set_to([
-              new INPUT_OBJECTS.input_title(_globs,{title: "loading field information",height: OBJ.input_height,callback: function(){alert('hi');}}),
-            ]);
+              var load_tables = [];//list of tables to load fields for
 
-            var load_tables = [];//list of tables to load fields for
-
-            var f = _globs.db_interface.fields[_globs.slist.picked_database];
-            if(f === undefined || f[start_table] === undefined){load_tables.push(start_table);}
-            if(f === undefined || f[end_table] === undefined){load_tables.push(start_table);}
-            if(load_tables.length > 0){
-              _globs.db_interface.load_table_fields([start_table,end_table],make_join_input);
-            } else {
-              make_join_input();//already loaded, just make it already
-            }
+              var f = _globs.db_interface.fields[_globs.slist.picked_database];
+              if(f === undefined || f[start_table] === undefined){load_tables.push(start_table);}
+              if(f === undefined || f[end_table] === undefined){load_tables.push(start_table);}
+              if(load_tables.length > 0){
+                _globs.db_interface.load_table_fields([start_table,end_table],make_join_input);
+              } else {
+                make_join_input();//already loaded, just make it already
+              }
           }
 
           //keep track of the last active tab

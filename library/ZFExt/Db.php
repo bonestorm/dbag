@@ -29,16 +29,19 @@ class ZFExt_Db {
                 break;
             }
 
+            static::$config[$type] = new Zend_Config_Ini( APPLICATION_ROOT . $load_path, APPLICATION_ENV);
+
+            $adapter = static::$config[$type]->database->adapter;
+            $params = static::$config[$type]->database->params->toArray();
+
             if($type == ZFExt_Db::SOURCE){
                 if(isset($database))
-                    $config[$type]->database->params->database = $database;
+                    $params['dbname'] = $database;
                 else
                     throw new Exception("An source database connection must have a second parameter that is the database requested");
             }
 
-            static::$config[$type] = new Zend_Config_Ini( APPLICATION_ROOT . $load_path, APPLICATION_ENV);
-
-            $db[$type] = Zend_Db::factory(static::$config[$type]->database);
+            $db[$type] = Zend_Db::factory($adapter,$params);
 
         }
 

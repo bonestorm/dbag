@@ -24,19 +24,32 @@ define(['table','join'],function(TABLE,JOIN){
         }
 
         OBJ.get_current_database = function(){ return _globs.slist.picked_database; }
-        OBJ.get_current_objects = function(){ return OBJ.objects[OBJ.get_current_database()]; }
+        OBJ.get_current_objects = function(){
+          var db = OBJ.get_current_database();
+          if(OBJ.objects[db] === undefined){
+            OBJ.objects[db] = {grid_info: {},table_ids: {}};
+          }
+          return OBJ.objects[db];
+        }
 
 
         //data comes back from the server as a big array of arrays.
         //we need hash with object id keys for 'grid_info' and a hash of table object name keys and id values for 'table_ids'
-        OBJ.process_loaded_objects = function(objects,raw_data){
-          
-            for(var i in raw_data){
-                objects.grid_info[raw_data[i].id] = $.extend({},raw_data[i]);
-                delete objects.grid_info[raw_data[i].id].id;//we don't need the id since it's the key now
-                if(raw_data[i].type == "TABLE"){//if it's a table then we need to be able to look up its id by its name
-                  objects.table_ids[raw_data[i].name] = raw_data[i].id;
+        OBJ.process_loaded_objects = function(raw_data){
+            var objs = OBJ.get_current_objects();
+
+            var raw_grid = raw_data.grid_info;
+
+            for(var i in raw_grid){
+                objs.grid_info[raw_grid[i].id] = $.extend({},raw_grid[i]);
+                delete objs.grid_info[raw_grid[i].id].id;//we don't need the id since it's the key now
+
+/*              //done on server side now
+                if(raw_grid[i].type == "TABLE"){//if it's a table then we need to be able to look up its id by its name
+                  objs.table_ids[raw_grid[i].name] = raw_grid[i].id;
                 }
+*/
+
             }
 
         }
@@ -47,7 +60,7 @@ define(['table','join'],function(TABLE,JOIN){
               if(raw_data === undefined){//if object is null then delete existing one
                 delete OBJ.objects[database];
               } else {
-                OBJ.process_loaded_objects(OBJ.objects[database],raw_data);
+                OBJ.process_loaded_objects(raw_data);
               }
             } else {
               alert("no database " + database + " in database info");
@@ -86,10 +99,11 @@ define(['table','join'],function(TABLE,JOIN){
 
             var obj_added = false;//returns true if at least one objects is added
 
-            var objects = OBJ.get_current_objects();
-            for(var id in objects.grid_info){
-              var obj = objects.grid_info[id];
+            var objs = OBJ.get_current_objects();
+            for(var id in objs.grid_info){
+              var obj = objs.grid_info[id];
               var new_obj;
+
               if(obj.type == "TABLE"){
                 //makes its own width even though it is provided. should i allow it to be set here?
                 new_obj = new TABLE(_globs,{cx:parseInt(obj.x),cy:parseInt(obj.y),db_id: id,name: obj.name});
@@ -106,7 +120,7 @@ define(['table','join'],function(TABLE,JOIN){
               }
               if(obj.type == "COMMENT"){
               }
-              if(new_obj.error != undefined && new_obj.error){
+              if(new_obj.error !== undefined && new_obj.error){
                 alert("Error creating a new object in the grid:" + new_obj.error);
               } else {
                 _globs.grid.add_obj(new_obj,false);//send it false to tell it to not bother with neighbor notification
@@ -150,6 +164,10 @@ results:    ['action' => 'deleted', 'id' => 23]
 */
 
             function ajax_call(){
+
+//if(OBJ.call_stack[0].data.action == "getAllObjects"){
+  //console.log(OBJ.call_stack[0]);
+//}
               $.ajax({
                 type: 'POST',
                 url: OBJ.db_interface_link,
@@ -222,7 +240,7 @@ results:    ['action' => 'deleted', 'id' => 23]
             function db_info_loaded(raw_data){
 
                 //takes the raw data from the server and processes it for use
-                OBJ.set_database_objects(raw_data);//add it to db_info
+                OBJ.set_database_objects(raw_data.data);//add it to db_info
 
                 //reset the grid
                 _globs.grid.reset();
@@ -247,7 +265,6 @@ results:    ['action' => 'deleted', 'id' => 23]
               }
               if(callback !== undefined){callback();}
             }
-
             OBJ.call(db_info_loaded,{action: "getTableFields", database: OBJ.get_current_database(), tables: tables});
         }
 

@@ -81,7 +81,7 @@ class ZFExt_Model_Application {
     protected function getTableSchemaId($database){
 
       //get the table_schema_id from the database name
-      $select = $this->db->select('table_schema_id')->from('table_schema')->where('id = ?',$database);
+      $select = $this->db->select('table_schema_id')->from('table_schema')->where('name = ?',$database);
       $table_schema_id = $this->db->fetchOne($select);
       if(!isset($table_schema_id)){
         throw Exception("failed to find the database id from a database name");
@@ -109,6 +109,10 @@ class ZFExt_Model_Application {
         ->where('go.table_schema_id = ?',$db_id);
         
         $result = $this->db->fetchAssoc($select);
+
+//error_log(print_r("db: ".$db_id,true));
+//error_log(print_r($select->__toString(),true));
+//error_log(print_r($result,true));
 
         #removes all the empty entries due to the outer joins.  leaves fields in the grid_object and grid_<type>
         #this would be so much easier in Perl
