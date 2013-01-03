@@ -169,18 +169,17 @@ define(['base'],function(BASE){
 
           var o = _globs.db_interface.objects[_globs.slist.picked_database];
 
-          var table_callback = function(json){
-
+          var table_callback = function(id){
             //table is full fledged now
-            OBJ.db_id = json.id;
-          
-            if(callback !== undefined){callback(json);}
+            if(id !== undefined){ OBJ.db_id = id; }
+            if(callback !== undefined){callback(id);}
           }
 
           var pass_vars = {action: "saveObject", database: _globs.slist.picked_database, type: "TABLE", name: OBJ.name, x: OBJ.cx, y: OBJ.cy, width: _cells_wide};
 
           if(o.table_ids[OBJ.name] !== undefined && o.table_ids[OBJ.name] != -1){
             pass_vars.id = o.table_ids[OBJ.name];
+          } else {
           }
           var json = _globs.db_interface.call(table_callback,pass_vars);
 

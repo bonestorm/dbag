@@ -38,19 +38,25 @@ define(['table','join'],function(TABLE,JOIN){
         OBJ.process_loaded_objects = function(raw_data){
             var objs = OBJ.get_current_objects();
 
-            var raw_grid = raw_data.grid_info;
+            //copy table ids
+            var raw_table = raw_data.table_ids;
+            objs.table_ids = $.extend({},raw_table);
 
+            //copy and process grid info
+            var raw_grid = raw_data.grid_info;
             for(var i in raw_grid){
                 objs.grid_info[raw_grid[i].id] = $.extend({},raw_grid[i]);
                 delete objs.grid_info[raw_grid[i].id].id;//we don't need the id since it's the key now
 
-/*              //done on server side now
+/*
+                //done on server side now
                 if(raw_grid[i].type == "TABLE"){//if it's a table then we need to be able to look up its id by its name
                   objs.table_ids[raw_grid[i].name] = raw_grid[i].id;
                 }
 */
 
             }
+
 
         }
 
@@ -68,6 +74,10 @@ define(['table','join'],function(TABLE,JOIN){
         }
 
         OBJ.set_table_fields = function(database,table,fields){
+//console.log("DB: "+database);
+//console.log("TABLE: "+table);
+//console.log("FIELDS: ");
+//console.log(fields);
             if($.inArray(database,OBJ.databases) != -1){
               if(OBJ.fields === undefined){OBJ.fields = [];}
               if(OBJ.fields[database] === undefined){OBJ.fields[database] = [];}
@@ -100,8 +110,24 @@ define(['table','join'],function(TABLE,JOIN){
             var obj_added = false;//returns true if at least one objects is added
 
             var objs = OBJ.get_current_objects();
-            for(var id in objs.grid_info){
+
+            //order the object creation by type so all tables are added before links
+            var type_scores = {TABLE: 3,COMMENT: 2,JOIN: 1};
+            var gids = Object.keys(objs.grid_info).sort(function(a,b){
+              var at = objs.grid_info[a]['type'];
+              var bt = objs.grid_info[b]['type'];
+              at = (type_scores[at] !== undefined) ? type_scores[at] : -1;
+              bt = (type_scores[bt] !== undefined) ? type_scores[bt] : -1;
+              return (bt-at);
+            });;
+            
+
+            for(var gid in gids){//objs.grid_info){
+              
+              var id = gids[gid];
               var obj = objs.grid_info[id];
+
+              //var obj = objs.grid_info[id];
               var new_obj;
 
               if(obj.type == "TABLE"){
@@ -136,19 +162,31 @@ define(['table','join'],function(TABLE,JOIN){
         OBJ.call = function(callback,data){
 
 /*
- 
-getTableFields: gets information about a table (or tables)
-passed in:  ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one','table_two','table_three']]
-results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['Type' => 'int(11)','Null' => true],'field_two' => ['Type......
 
 getDatabaseNames: gets names of all the databases in dbag.table_schema
 passed in:  ['action' => 'getDatabaseNames']
 results:    ['action' => 'getDatabaseNames', 'data' => ['database1','database2','database3'....
 
-getAllObjects:
-passed in:  ['action' => 'getAllObjects', 'database' => 'database_name']
-results:    ['action' => 'getAllObjects', 'database' => 'database_name', 'data' => [['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...],['id' => 70, 'type' => 'JOIN'....
 
+getTableIds: gets names of all the tables in the selected database
+passed in:  ['action' => 'getTableIds', 'database' => 'database_name']
+results:    ['action' => 'getTableIds', 'database' => 'database_name', 'data' => ['table1' => '<table1_id> or -1 if table not placed in grid,'table2' => '<table2_id or -1...
+
+getAllObjects: (getTableIds is calle implicitely and its results are added to table_info, giving any tables not placed a '-1' value)
+passed in:  ['action' => 'getAllObjects', 'database' => 'database_name']
+results:    ['action' => 'getAllObjects', 'database' => 'database_name', 
+  'data' => [
+    grid_info: ['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...],['id' => 70, 'type' => 'JOIN'....]
+    table_info: ['table1' => '<table1_id> or -1 if table not placed in grid,'table2' => '<table2_id or -1...]
+  ] 
+]   
+    
+        
+getTableFields: gets information about a table (or tables)
+passed in:  ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one','table_two','table_three']]
+results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['data_type' => 'int(11)','nullable' => true],'field_two' => ['data_type......       
+            
+        
 saveObject: (value of returned 'inserted' and 'updated' field is the id of the grid object)
 if there is no 'id' then it will insert
 passed in:  ['action' => 'saveObject', 'data' => ['type' => 'TABLE','x' => 12,'y' => 23...]]
@@ -159,15 +197,13 @@ results:    ['action' => 'updated', 'id' => 60]
         
 deleteObject:
 passed in:  ['action' => 'deleteObject', 'id' => 23]
-results:    ['action' => 'deleted', 'id' => 23]
- 
+results:    ['action' => 'deleted', 'id' => 23] 
+
 */
 
             function ajax_call(){
+//console.log(OBJ.call_stack[0].data);
 
-//if(OBJ.call_stack[0].data.action == "getAllObjects"){
-  //console.log(OBJ.call_stack[0]);
-//}
               $.ajax({
                 type: 'POST',
                 url: OBJ.db_interface_link,
@@ -176,24 +212,28 @@ results:    ['action' => 'deleted', 'id' => 23]
                 data: {stack: [OBJ.call_stack[0].data]},
                 success: function(ret_stack) {
 
-                  var req = OBJ.call_stack[0];//passed in data
+//console.log("RET STACK");
+//console.log(ret_stack);
+
+                  var req = OBJ.call_stack[0].data;//passed in data
                   var req_action = req.action;
 
                   var ret = ret_stack[0];//only single row stacks for now
                   var action = ret.action;
 
                   var objs = OBJ.get_current_objects();
-             
+          
+ 
                   if(req_action == "saveObject"){
 
                     var id = ret.id;
 
                     //table object insert so add it to table_ids
-                    if(req.name !== undefined){ objs.table_ids[req.name] = id; }
+                    if(req.data.name !== undefined){ objs.table_ids[req.data.name] = id; }
 
                     if(objs.grid_info[id] === undefined){objs.grid_info[id] = {};}
-                    for(var i in req){
-                        objs.grid_info[id][i] = (i == "leads") ? eval(req[i]) : req[i];
+                    for(var i in req.data){
+                        objs.grid_info[id][i] = (i == "leads") ? eval(req.data[i]) : req.data[i];
                     }
 
                   }
@@ -211,7 +251,9 @@ results:    ['action' => 'deleted', 'id' => 23]
                     }
                   }
 
-                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(ret);}
+                  var callback_data = (ret.data !== undefined) ? ret.data : ret.id;
+
+                  if(OBJ.call_stack[0].callback !== undefined){OBJ.call_stack[0].callback(callback_data);}
 
                   OBJ.call_stack.shift();//remove this call
 
@@ -224,8 +266,20 @@ results:    ['action' => 'deleted', 'id' => 23]
 
               });
             }
-            
-            OBJ.call_stack.push({callback:callback,data:data});
+
+            //pre processing for the call information
+            //in the array passed for the call there are 2 important fields to keep on the main level: 'action' and 'database'
+            //all other fields are bundled up and put in 'data'
+            var call_info = $.extend({},data);
+            for(var i in call_info){
+              if(i != "action" && i != "database" && i != "data"){
+                if(call_info.data === undefined){call_info.data = {};}
+                call_info.data[i] = call_info[i];
+                delete call_info[i];
+              }
+            }
+
+            OBJ.call_stack.push({callback:callback,data:call_info});
 
             if(OBJ.call_stack.length == 1){//start up the chain
               $("#text_overlay").append(OBJ.ajax_load);//notify that it's processing
@@ -240,7 +294,7 @@ results:    ['action' => 'deleted', 'id' => 23]
             function db_info_loaded(raw_data){
 
                 //takes the raw data from the server and processes it for use
-                OBJ.set_database_objects(raw_data.data);//add it to db_info
+                OBJ.set_database_objects(raw_data);//add it to db_info
 
                 //reset the grid
                 _globs.grid.reset();
@@ -265,7 +319,7 @@ results:    ['action' => 'deleted', 'id' => 23]
               }
               if(callback !== undefined){callback();}
             }
-            OBJ.call(db_info_loaded,{action: "getTableFields", database: OBJ.get_current_database(), tables: tables});
+            OBJ.call(db_info_loaded,{action: "getTableFields", database: OBJ.get_current_database(), data: tables});
         }
 
         return OBJ;

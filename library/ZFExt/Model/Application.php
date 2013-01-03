@@ -15,7 +15,7 @@ class ZFExt_Model_Application {
 
         $this->db = $new_db;
 
-        $this->object_types = array('table','lead','comment');
+        $this->object_types = array('table','join','comment');
 
         $this->table_aliases = array('object' => 'go','table' => 'gt','join' => 'gj','comment' => 'gc');
 
@@ -81,10 +81,10 @@ class ZFExt_Model_Application {
     protected function getTableSchemaId($database){
 
       //get the table_schema_id from the database name
-      $select = $this->db->select('table_schema_id')->from('table_schema')->where('name = ?',$database);
+      $select = $this->db->select()->from('table_schema','id')->where('name = ?',$database);
       $table_schema_id = $this->db->fetchOne($select);
       if(!isset($table_schema_id)){
-        throw Exception("failed to find the database id from a database name");
+        throw new Exception("failed to find the database id from a database name");
       }
       return $table_schema_id;
 
@@ -106,13 +106,10 @@ class ZFExt_Model_Application {
         ->joinLeft(array('gt' => 'grid_table'),'go.id = gt.grid_object_id', $this->select_fields['table'])
         ->joinLeft(array('gj' => 'grid_join'),'go.id = gj.grid_object_id', $this->select_fields['join'])
         ->joinLeft(array('gc' => 'grid_comment'),'go.id = gc.grid_object_id', $this->select_fields['comment'])
-        ->where('go.table_schema_id = ?',$db_id);
+        ->where('go.table_schema_id = ?',$db_id)
+        ->order('go.type');
         
-        $result = $this->db->fetchAssoc($select);
-
-//error_log(print_r("db: ".$db_id,true));
-//error_log(print_r($select->__toString(),true));
-//error_log(print_r($result,true));
+        $result = $this->db->fetchAll($select);
 
         #removes all the empty entries due to the outer joins.  leaves fields in the grid_object and grid_<type>
         #this would be so much easier in Perl
@@ -126,7 +123,6 @@ class ZFExt_Model_Application {
             }
             $short_result[] = $short_row;
         }
-
         return $short_result;//$select->__toString();
 
         //todo: collect table_ids, just for grid_tables
@@ -156,20 +152,39 @@ class ZFExt_Model_Application {
     #Returns the id of the new grid object
     ##
     public function insertObject($fields){
-        if(!in_array($fields->type,$this->object_types)){
-            throw Exception("type of this object is invalid, can't insert it");
+        if(!in_array(strtolower($fields['type']),$this->object_types)){
+            throw new Exception("type of this object is invalid, can't insert it");
         }
         unset($fields['id']);//remove it if it's set so we can detect that it gets set.
-        $num_inserted = $this->db->insert('grid_object',$this->assoc_subset($fields,$this->select_fields['object']));
-        $fields['id'] = $this->db->lastInsertId();
-        if(!isset($fields->id)){
-            throw Exception("insert object failed");
+
+        $type = strtolower($fields['type']);
+
+        $this->db->beginTransaction();
+
+        $in_fields = $this->assoc_subset($fields,$this->table_fields['object']);
+
+        $num_inserted = $this->db->insert('grid_object',$in_fields);
+
+        if($num_inserted != 1){
+            $this->db->rollBack();
+            throw new Exception("insert object failed");
         } else {
-            $num_inserted = $this->db->insert('grid_'.$fields['type'],$this->assoc_subset($fields,$this->select_fields[$fields->type]));
+
+            $in_fields = $this->assoc_subset($fields,$this->table_fields[$type]);
+
+            $new_id = $this->db->lastInsertId();
+
+            $in_fields['grid_object_id'] = $new_id;
+
+            $num_inserted = $this->db->insert('grid_'.$type,$in_fields);
             if(!isset($num_inserted)){
-                throw Exception("insert {$fields['type']} object failed");
+                $this->db->rollBack();
+                throw new Exception("insert {$fields['type']} object failed");
+            } else {
+                $this->db->commit();
             }
-            return $fields['id'];
+
+            return $new_id;
         }
     }
 
@@ -178,46 +193,57 @@ class ZFExt_Model_Application {
     #Returns the number of records effected
     ##
     protected function updateObject($fields){
-        if(!in_array($fields['type'],$this->object_types)){
-            throw Exception("type of this object is invalid, can't update it");
+        if(!in_array(strtolower($fields['type']),$this->object_types)){
+            throw new Exception("type of this object is invalid, can't update it");
         }
-        $num_updated = $this->db->update('grid_object',$this->assoc_subset($fields,$this->select_fields['object']));
-        if(!isset($num_updated) || $num_updated <= 0){
-            throw Exception("failed to update");
-        } else {
-            $num_updated = $this->db->update('grid_'.$fields['type'],$this->assoc_subset($fields,$this->select_fields[$fields['type']]),array('grid_object_id = ?',$fields['id']));
-            if(!isset($num_updated)){
-                throw Exception("update {$fields['type']} object failed");
-            }
-            return $num_udpated;
-        }
+
+        $type = strtolower($fields['type']);
+
+        $up_fields = $this->assoc_subset($fields,$this->table_fields['object']);
+        unset($up_fields['type']);//can't update the type
+        unset($up_fields['id']);
+
+        $num_updated = 0;
+
+        $num_updated += $this->db->update('grid_object',$up_fields,array('id = ?' => $fields['id']));
+
+        $up_fields = $this->assoc_subset($fields,$this->table_fields[$type]);
+
+
+        $num_updated += $this->db->update('grid_'.$type,$up_fields,array('grid_object_id = ?' => $fields['id']));
+
+        return $num_updated;
+
     }
     ##
     #Deletes any grid object
     #Returns the number of records effected
     ##
-    protected function deleteObject($fields){
+    public function deleteObject($fields){
 
         //get type if not passed in
         if(!isset($fields['type'])){
-          $select = $this->db->select('type')->from('grid_object')->where('id = ?',$fields['id']);
+          $select = $this->db->select()->from('grid_object','type')->where('id = ?',$fields['id']);
           $fields['type'] = $this->db->fetchOne($select);
         }
 
-        if(!isset($fields['type'])){
-            throw Exception("type is a required field to delete a grid object, it is not provided");
-        }
+        $type = strtolower($fields['type']);
 
-        if(!in_array($fields['type'],$this->object_types)){
-            throw Exception("type of this object is invalid, can't delete it");
-        }
-        $num_deleted = $this->db->delete('grid_'.$fields['type'],"grid_object_id = '".$this->db->quote($fields['id'])."'");
-        if(!isset($num_delete) || $num_delete <= 0){
-            throw Exception("failed to delete object");
+        $this->db->beginTransaction();
+
+        $num_deleted = $this->db->delete('grid_'.$type,"grid_object_id = ".$this->db->quote($fields['id']));
+
+        if($num_deleted != 1){
+            $this->db->rollBack();
+            throw new Exception("failed to delete object");
         } else {
-            $num_delete = $this->db->delete('grid_object',"id = '".$this->db->quote($fields['id'])."'");
+
+            $num_delete = $this->db->delete('grid_object',"id = ".$this->db->quote($fields['id']));
             if(!isset($num_delete)){
-                throw Exception("delete {$fields['type']} object failed");
+                $this->db->rollBack();
+                throw new Exception("delete {$type} object failed");
+            } else {
+                $this->db->commit();
             }
             return $num_delete;
         }
@@ -230,27 +256,23 @@ class ZFExt_Model_Application {
     ##
     public function saveObject($fields,$database = null){
 
-        if(isset($fields['type'])){
-          $fields['type'] = strtoupper($field['type']);
-        }
-
         //'id' is the grid object id,'table_schema_id' is the database id
 
         //if 'id' in $fields exists then updates it, else creates it
 
-        if(!isset($fields['id']) && !is_null($fields['id'])){
+        if(!isset($fields['id']) || is_null($fields['id'])){
 
             //see if we need to get the table_schema_id, get it if we do
             if(!isset($fields['table_schema_id'])){
               if(!isset($database)){
-                throw Exception("not given any database information for the grid object insert");
+                throw new Exception("not given any database information for the grid object insert");
               } else {
                 $fields['table_schema_id'] = $this->getTableSchemaId($database);
               }
             }
 
             //insert it
-            $new_id = $this->insertObject($fields);//creates object and adds new $field->id
+            $new_id = $this->insertObject($fields);//creates object and adds new $fields['id']
             return array('action' => 'inserted', 'id' => $new_id);
 
         } else {
@@ -271,7 +293,7 @@ class ZFExt_Model_Application {
     public function assoc_subset($hash,$picked){
         $res = array();
         foreach($picked as $key){
-            if(isset($hash[$key])){
+            if(isset($hash[$key]) && !is_null($hash[$key]) && strtolower($hash[$key]) != "null"){
                 $res[$key] = $hash[$key];
             } else {
                 //something in picked that isn't in hash.

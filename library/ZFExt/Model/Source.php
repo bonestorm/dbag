@@ -19,15 +19,19 @@ class ZFExt_Model_Source {
         $res = array();
         foreach($tables as $table){
             if(!array_key_exists($table,$res)){//might be duplicate tables so don't select it again
-                $stmt = $this->db->query("SHOW columns from '".$this->db->quote($table)."'");
+
                 $res[$table] = array();
-                while($row = $stmt->fetch()){
-                    foreach(array('Type','Null') as $ff){
-                        $res[$table][$row['Field']][strtolower($ff)] = $row[$ff];
-                    }
+
+                $meta = $this->db->describeTable($table);#get the info
+
+                foreach($meta as $fname => $finfo){
+                  foreach(array('DATA_TYPE','NULLABLE') as $ff){
+                      $res[$table][$fname][strtolower($ff)] = $finfo[$ff];
+                  }
                 }
             }
         }
+
         return $res;
 
     }

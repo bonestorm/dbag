@@ -61,21 +61,30 @@ define(function(){
 
         if(options.table_from_id !== undefined && options.table_to_id !== undefined){
           OBJ.link = {linked: true,start:options.table_from_id,end:options.table_to_id};
-          OBJ.link.start_field = (options.field_from !== undefined) ? options.field_from : undefined;
-          OBJ.link.end_field = (options.field_to !== undefined) ? options.field_to : undefined;
+          OBJ.link.start_field = (options.field_from) ? options.field_from : undefined;
+          OBJ.link.end_field = (options.field_to) ? options.field_to : undefined;
         }
 
         OBJ.is_linked = function(){
-          if(OBJ.link !== undefined && OBJ.link.linked !== undefined && OBJ.link.linked &&
-            OBJ.link.start !== undefined && OBJ.link.start.length > 0 &&
-            OBJ.link.end !== undefined && OBJ.link.end.length > 0 &&
-            OBJ.link.start_field !== undefined && OBJ.link.start_field.length > 0 &&
-            OBJ.link.end_field !== undefined && OBJ.link.end_field.length > 0
+          if(
+OBJ.link !== undefined &&
+OBJ.link.linked !== undefined &&
+OBJ.link.start !== undefined &&
+OBJ.link.end !== undefined &&
+OBJ.link.start_field !== undefined &&
+OBJ.link.end_field !== undefined 
           ){
-            return true;
-          } else {
-            return false;
+            if(
+OBJ.link.linked &&
+OBJ.link.start.length > 0 &&
+OBJ.link.end.length > 0 &&
+OBJ.link.start_field.length > 0 &&
+OBJ.link.end_field.length > 0
+            ){
+              return true;
+            }
           }
+          return false;
         }
         
         OBJ.type = function(){return "join";}
@@ -336,7 +345,7 @@ define(function(){
 
           //border
           ctx.globalAlpha = alpha;
-          ctx.strokeStyle = "#000000";
+          ctx.strokeStyle = OBJ.focus ? "#ff0000" : "#000000";
           ctx.fillStyle = "#ffffff";
           ctx.lineWidth = (OBJ.selected ? 3.5 : 1.5);
           ctx.beginPath();
@@ -550,7 +559,7 @@ define(function(){
           //if focusing is false then it's unfocusing
           if(focusing){
             if(OBJ.db_id !== undefined){
-              _globs.slist.start_input_type("join",OBJ);
+              _globs.slist.start_input_type("join",OBJ);//still needs to meet criteria
             }
           } else {
             _globs.slist.clear_input_type("join");
@@ -607,7 +616,7 @@ define(function(){
                   if(OBJ.double_click !== undefined && !OBJ.double_click){
 
                     //simple click
-                    if(!_globs.main.shiftKey){ret.refresh = _globs.grid.clear_selected();}
+                    if(!_globs.key.shiftKey){ret.refresh = _globs.grid.clear_selected();}
                     _globs.grid.select_obj(OBJ,{select:true,override:true});
 
                     //OBJ.active = true;
@@ -813,12 +822,18 @@ define(function(){
         //required for all grid objects
         OBJ.save_to_db = function(callback){
 
-          var table_callback = function(json){
-
+          var table_callback = function(id){
             //table is full fledged now
-            OBJ.db_id = json.id;
+            if(id !== undefined){OBJ.db_id = id;}
 
-            if(callback !== undefined){callback(json);}
+            //see if it's a good point to start composing a query
+            if(OBJ.selected){
+              var is_set = _globs.composer.set_starting_point(OBJ);
+              if(is_set){_globs.refresh();}
+            }
+
+            if(callback !== undefined){callback(id);}
+
           }
 
           var pass_vars = {
@@ -842,10 +857,11 @@ define(function(){
             if(OBJ.link.end_field !== undefined){pass_vars.field_to = OBJ.link.end_field;}
           }
 
-          if(OBJ.db_id !== undefined){
-            pass_vars.db_id = OBJ.db_id;
-          }
-             
+          //if(OBJ.db_id !== undefined){
+            //pass_vars.db_id = OBJ.db_id;
+          //}
+
+
           var json = _globs.db_interface.call(table_callback,pass_vars);
 
         }

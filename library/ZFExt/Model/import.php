@@ -24,7 +24,7 @@
     }
 
     if(!is_array($db_names)){
-        throw Exception("failure getting application's database names for import into admin database");
+        throw new Exception("failure getting application's database names for import into admin database");
     } else {
 
         $db_app = ZFExt_Db::getInstance(ZFExt_Db::APPLICATION);

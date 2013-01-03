@@ -827,7 +827,10 @@ define(['base','table','join'],function(BASE,TABLE,JOIN){
           }
 
           if(sel_obj_ids.length > 0) {
+
             OBJ.freeze();
+
+            OBJ.clear_selected();
 
             for(var obj_ind in sel_obj_ids){
               var obj_id = sel_obj_ids[obj_ind];

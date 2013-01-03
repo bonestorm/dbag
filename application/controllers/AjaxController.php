@@ -52,12 +52,13 @@ results:    ['action' => 'getAllObjects', 'database' => 'database_name',
 
 getTableFields: gets information about a table (or tables)
 passed in:  ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one','table_two','table_three']]
-results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['Type' => 'int(11)','Null' => true],'field_two' => ['Type......
+results:    ['action' => 'getTableFields', 'database' => 'database_name', 'data' => ['table_one' => ['field_one' => ['data_type' => 'int(11)','nullable' => true],'field_two' => ['data_type......       
+
 
 
 saveObject: (value of returned 'inserted' and 'updated' field is the id of the grid object)
 if there is no 'id' then it will insert
-passed in:  ['action' => 'saveObject', 'data' => ['type' => 'TABLE','x' => 12,'y' => 23...]]
+passed in:  ['action' => 'saveObject', 'database' => 'database_name', 'data' => ['type' => 'TABLE','x' => 12,'y' => 23...]]
 results:    ['action' => 'inserted', 'id' => 60]
 if there IS an 'id' then it will update
 passed in:  ['action' => 'saveObject', 'data' => ['id' => 60, 'type' => 'TABLE','x' => 12,'y' => 23...]]
@@ -125,19 +126,17 @@ results:    ['action' => 'deleted', 'id' => 23]
                         }
                       }
 
-//error_log(print_r($grid_info,true));
-//error_log(print_r($table_ids,true));
                       //send it all back
                       $stack_row['data'] = array('grid_info' => $grid_info,'table_ids' => $table_ids,'deleted_table_ids' => $deleted_table_ids);
 
                     break;
 
                     case 'getTableFields':
-                      $stack['data'] = $source_model->getTableFields($stack_row['data']);
+                      $stack_row['data'] = $source_model->getTableFields($stack_row['data']);
                     break;
 
                     case 'saveObject':
-                      $res = $app_model->saveObject($stack_row['data']);
+                      $res = $app_model->saveObject($stack_row['data'],$stack_row['database']);
                       if($res['action'] == "inserted"){
                           $stack_row = array('action' => 'inserted', 'id' => $res['id']);
                       } else {//update
@@ -146,15 +145,13 @@ results:    ['action' => 'deleted', 'id' => 23]
                     break;
                     case 'deleteObject':
                       $num_del = $app_model->deleteObject($stack_row['data']);
-                      if($num_del > 0){ $stack_row = array('action' => 'deleted', 'id' => $res['id']); }
+                      if($num_del > 0){ $stack_row = array('action' => 'deleted', 'id' => $stack_row['data']['id']); }
                     break;
                 }
             } else {
                 throw new Exception("stack action not recognized");
             }
         }
-
-//error_log(print_r($stack,true));
 
         $this->_helper->json($stack);
 

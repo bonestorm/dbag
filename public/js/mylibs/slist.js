@@ -298,7 +298,7 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
           if(type == "db"){
 
               function set_db_tab(dbs){
-                var db_names = dbs.data;
+                var db_names = dbs;
                 if(db_names !== undefined){
                   _globs.db_interface.set_databases(db_names);
                 }
@@ -482,13 +482,15 @@ define(['base','table','input_objects'],function(BASE,TABLE,INPUT_OBJECTS){
                 new INPUT_OBJECTS.input_title(_globs,{title: "loading field information",height: OBJ.input_height,callback: function(){alert('hi');}}),
               ]);
 
+              //load the table's fields if they haven't been
               var load_tables = [];//list of tables to load fields for
 
               var f = _globs.db_interface.fields[_globs.slist.picked_database];
               if(f === undefined || f[start_table] === undefined){load_tables.push(start_table);}
-              if(f === undefined || f[end_table] === undefined){load_tables.push(start_table);}
+              if(f === undefined || f[end_table] === undefined){load_tables.push(end_table);}
+
               if(load_tables.length > 0){
-                _globs.db_interface.load_table_fields([start_table,end_table],make_join_input);
+                _globs.db_interface.load_table_fields(load_tables,make_join_input);
               } else {
                 make_join_input();//already loaded, just make it already
               }

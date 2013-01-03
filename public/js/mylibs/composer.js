@@ -59,11 +59,14 @@ define(['base'],function(BASE){
             if(start_obj.type() == "join"){
               if(start_obj.is_linked()){
                 OBJ.start = {type:"join",obj:start_obj,link:BASE.clone(start_obj.link)};
+                return true;
               }
             }
             if(start_obj.type() == "table"){
               OBJ.start = {type:"table",obj:start_obj};
+              return true;
             }
+            return false;
         }
         OBJ.clear_starting_point = function(){
             OBJ.start = undefined;

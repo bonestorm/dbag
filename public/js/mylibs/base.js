@@ -119,7 +119,7 @@ define(function(){
 
         var temp = new obj.constructor();
         for(var key in obj)
-            temp[key] = clone(obj[key]);
+            temp[key] = OBJ.clone(obj[key]);
 
         return temp;
     }
